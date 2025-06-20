@@ -27,4 +27,8 @@ Route::get('/reportes', function () {
     return Inertia::render('reportes');
 })->name('reportes');
 
+Route::get('/nuevoCliente', function () {
+    return Inertia::render('nuevoCliente');
+})->name('nuevoCliente');
+
 require __DIR__.'/auth.php';

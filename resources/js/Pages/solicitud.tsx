@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Link } from '@inertiajs/react';
 
 export default function Solicitud() {
   const [form, setForm] = useState({
+    cliente_id: '',
     nombres: '',
     apellidos: '',
     cedula: '',
@@ -60,106 +62,44 @@ export default function Solicitud() {
             {/* Secciones */}
             {[
               {
-                key: 'personal',
-                title: '📋 Información Personal',
+                key: 'cliente',
+                title: '👤 Seleccionar Cliente',
                 fields: (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Nombres */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Nombres <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="nombres"
-                          value={form.nombres}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Apellidos */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Apellidos <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="apellidos"
-                          value={form.apellidos}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Cédula */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Cédula de Identidad <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="cedula"
-                          value={form.cedula}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Fecha de nacimiento */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Fecha de Nacimiento <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="date"
-                          name="fecha_nacimiento"
-                          value={form.fecha_nacimiento}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Teléfono */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Teléfono <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          name="telefono"
-                          value={form.telefono}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Email */}
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Correo Electrónico
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={form.email}
-                          onChange={handleChange}
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      {/* Dirección */}
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Dirección Completa <span className="text-red-600">*</span>
-                        </label>
-                        <textarea
-                          name="direccion"
-                          value={form.direccion}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        />
-                      </div>
+                  <div className="flex flex-col md:flex-row md:items-end gap-4">
+                    {/* Select de clientes (ejemplo con datos dummy) */}
+                    <div className="flex-1">
+                      <label
+                        htmlFor="cliente_id"
+                        className="block text-sm font-medium text-slate-700 mb-1"
+                      >
+                        Cliente <span className="text-red-600">*</span>
+                      </label>
+                      <select
+                        id="cliente_id"
+                        name="cliente_id"
+                        value={form.cliente_id}
+                        onChange={handleChange}
+                        required
+                        className="w-full border border-slate-300 rounded-md px-3 py-2
+                                   focus:outline-none focus:ring-2 focus:ring-blue-500
+                                   focus:border-blue-500"
+                      >
+                        <option value="">-- Seleccione un cliente --</option>
+                        <option value="cliente1">Cliente 1</option>
+                        <option value="cliente2">Cliente 2</option>
+                        <option value="cliente3">Cliente 3</option>
+                      </select>
                     </div>
-                  </>
+              
+                    {/* Botón para “Cliente Nuevo” */}
+                    <Link
+                      href={route('nuevoCliente')}
+                      className="mt-4 md:mt-0 bg-green-600 hover:bg-green-700
+                                text-white px-4 py-2 rounded-md font-medium transition"
+                    >
+                      + Cliente Nuevo
+                    </Link>
+                  </div>
                 ),
               },
               {
