@@ -29,8 +29,22 @@ export default function NuevoCliente() {
     
     // Información Laboral
     ocupacion: '',
-    empresa: '',
-    ingresos: '',
+    telefono_trabajo: '',
+    nombre_empresa: '',
+    antiguedad: '',
+    calle_trabajo: '',
+    numero_trabajo: '',
+    colonia_trabajo: '',
+    municipio_trabajo: '',
+    familiar_con_credito: '',
+    monto_percibe: '',
+    frecuencia_pago: '',
+    
+    // Ingresos Adicionales
+    tiene_ingresos_adicionales: false,
+    concepto_adicional: '',
+    monto_adicional: '',
+    frecuencia_adicional: '',
     
     // Consentimientos
     autorizoCreditos: false,
@@ -46,6 +60,19 @@ export default function NuevoCliente() {
     setForm((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+    }));
+  }
+
+  // Función para manejar el toggle de ingresos adicionales
+  function handleIngresosAdicionalesToggle(e: React.ChangeEvent<HTMLInputElement>) {
+    const { checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      tiene_ingresos_adicionales: checked,
+      // Limpiar campos si se desactiva
+      concepto_adicional: checked ? prev.concepto_adicional : '',
+      monto_adicional: checked ? prev.monto_adicional : '',
+      frecuencia_adicional: checked ? prev.frecuencia_adicional : '',
     }));
   }
 
@@ -69,6 +96,13 @@ export default function NuevoCliente() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              
+              // Validación especial para ocupación
+              if (!form.ocupacion.trim()) {
+                alert('⚠️ ATENCIÓN: La ocupación es obligatoria. Sin este dato el crédito será CANCELADO.');
+                return;
+              }
+              
               alert('Guardar cliente - implementar lógica aquí');
             }}
           >
@@ -450,6 +484,17 @@ export default function NuevoCliente() {
                 <span className="text-xl">💼</span>
                 Información Laboral
               </h2>
+              
+              {/* Alerta sobre ocupación */}
+              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-600 text-lg">⚠️</span>
+                  <p className="text-sm text-red-800 font-medium">
+                    <strong>IMPORTANTE:</strong> La ocupación es obligatoria. En caso de no especificar, el crédito será <strong>CANCELADO</strong>.
+                  </p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Ocupación */}
                 <div>
@@ -457,56 +502,312 @@ export default function NuevoCliente() {
                     htmlFor="ocupacion"
                     className="block text-sm font-medium text-slate-700 mb-1"
                   >
-                    Ocupación
+                    Ocupación <span className="text-red-600">*</span>
                   </label>
                   <input
                     id="ocupacion"
                     name="ocupacion"
                     value={form.ocupacion}
                     onChange={handleChange}
-                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingeniero"
+                    required
+                    className="w-full border border-red-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Ej: Ingeniero, Contador, Vendedor..."
                   />
                 </div>
 
-                {/* Empresa */}
+                {/* Teléfono del Trabajo */}
                 <div>
                   <label
-                    htmlFor="empresa"
+                    htmlFor="telefono_trabajo"
                     className="block text-sm font-medium text-slate-700 mb-1"
                   >
-                    Empresa/Empleador
+                    Teléfono del Trabajo <span className="text-red-600">*</span>
                   </label>
                   <input
-                    id="empresa"
-                    name="empresa"
-                    value={form.empresa}
+                    id="telefono_trabajo"
+                    name="telefono_trabajo"
+                    type="tel"
+                    value={form.telefono_trabajo}
                     onChange={handleChange}
+                    required
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="55 1234 5678"
+                  />
+                </div>
+
+                {/* Nombre de la Empresa */}
+                <div>
+                  <label
+                    htmlFor="nombre_empresa"
+                    className="block text-sm font-medium text-slate-700 mb-1"
+                  >
+                    Nombre de la Empresa <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    id="nombre_empresa"
+                    name="nombre_empresa"
+                    value={form.nombre_empresa}
+                    onChange={handleChange}
+                    required
                     className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Nombre de la empresa"
                   />
                 </div>
 
-                {/* Ingresos */}
+                {/* Antigüedad */}
                 <div>
                   <label
-                    htmlFor="ingresos"
+                    htmlFor="antiguedad"
                     className="block text-sm font-medium text-slate-700 mb-1"
                   >
-                    Ingresos mensuales
+                    Antigüedad (años) <span className="text-red-600">*</span>
                   </label>
                   <input
-                    id="ingresos"
-                    name="ingresos"
+                    id="antiguedad"
+                    name="antiguedad"
                     type="number"
-                    step="0.01"
-                    value={form.ingresos}
+                    min="0"
+                    step="0.5"
+                    value={form.antiguedad}
                     onChange={handleChange}
+                    required
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="2.5"
+                  />
+                </div>
+
+                {/* Familiar con Crédito */}
+                <div>
+                  <label
+                    htmlFor="familiar_con_credito"
+                    className="block text-sm font-medium text-slate-700 mb-1"
+                  >
+                    ¿Familiar con Crédito? <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    id="familiar_con_credito"
+                    name="familiar_con_credito"
+                    value={form.familiar_con_credito}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Seleccione...</option>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                {/* Monto que Percibe */}
+                <div>
+                  <label
+                    htmlFor="monto_percibe"
+                    className="block text-sm font-medium text-slate-700 mb-1"
+                  >
+                    Monto que Percibe <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    id="monto_percibe"
+                    name="monto_percibe"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.monto_percibe}
+                    onChange={handleChange}
+                    required
                     className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="15000.00"
                   />
                 </div>
+
+                {/* Frecuencia de Pago */}
+                <div>
+                  <label
+                    htmlFor="frecuencia_pago"
+                    className="block text-sm font-medium text-slate-700 mb-1"
+                  >
+                    Frecuencia de Pago <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    id="frecuencia_pago"
+                    name="frecuencia_pago"
+                    value={form.frecuencia_pago}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Seleccione...</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="quincenal">Quincenal</option>
+                    <option value="mensual">Mensual</option>
+                  </select>
+                </div>
               </div>
+
+              {/* Domicilio Secundario (Trabajo) */}
+              <div className="mt-6">
+                <h3 className="text-md font-medium text-slate-700 mb-4">Domicilio del Trabajo</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Calle y Número del Trabajo */}
+                  <div className="md:col-span-2">
+                    <label
+                      htmlFor="calle_trabajo"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Calle y Número <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      id="calle_trabajo"
+                      name="calle_trabajo"
+                      value={form.calle_trabajo}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Av. Reforma 123"
+                    />
+                  </div>
+
+                  {/* Colonia del Trabajo */}
+                  <div>
+                    <label
+                      htmlFor="colonia_trabajo"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Colonia <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      id="colonia_trabajo"
+                      name="colonia_trabajo"
+                      value={form.colonia_trabajo}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Centro"
+                    />
+                  </div>
+
+                  {/* Municipio del Trabajo */}
+                  <div>
+                    <label
+                      htmlFor="municipio_trabajo"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Municipio <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      id="municipio_trabajo"
+                      name="municipio_trabajo"
+                      value={form.municipio_trabajo}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Cuauhtémoc"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Ingresos Adicionales */}
+            <section className="mb-8">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <span className="text-xl">💰</span>
+                Ingresos Adicionales
+              </h2>
+              
+              {/* Toggle para ingresos adicionales */}
+              <div className="mb-4">
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="tiene_ingresos_adicionales"
+                    checked={form.tiene_ingresos_adicionales}
+                    onChange={handleIngresosAdicionalesToggle}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    ¿Tiene ingresos adicionales?
+                  </span>
+                </label>
+              </div>
+
+              {/* Campos de ingresos adicionales (solo si está activado) */}
+              {form.tiene_ingresos_adicionales && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-md border border-blue-200">
+                  {/* Concepto */}
+                  <div>
+                    <label
+                      htmlFor="concepto_adicional"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Concepto <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      id="concepto_adicional"
+                      name="concepto_adicional"
+                      value={form.concepto_adicional}
+                      onChange={handleChange}
+                      required={form.tiene_ingresos_adicionales}
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ej: Freelance, Renta, Comisiones..."
+                    />
+                  </div>
+
+                  {/* Monto Adicional */}
+                  <div>
+                    <label
+                      htmlFor="monto_adicional"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Monto <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      id="monto_adicional"
+                      name="monto_adicional"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.monto_adicional}
+                      onChange={handleChange}
+                      required={form.tiene_ingresos_adicionales}
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="5000.00"
+                    />
+                  </div>
+
+                  {/* Frecuencia Adicional */}
+                  <div>
+                    <label
+                      htmlFor="frecuencia_adicional"
+                      className="block text-sm font-medium text-slate-700 mb-1"
+                    >
+                      Frecuencia <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      id="frecuencia_adicional"
+                      name="frecuencia_adicional"
+                      value={form.frecuencia_adicional}
+                      onChange={handleChange}
+                      required={form.tiene_ingresos_adicionales}
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Seleccione...</option>
+                      <option value="semanal">Semanal</option>
+                      <option value="quincenal">Quincenal</option>
+                      <option value="mensual">Mensual</option>
+                      <option value="eventual">Eventual</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {!form.tiene_ingresos_adicionales && (
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200 text-center">
+                  <p className="text-sm text-gray-600">
+                    Los campos de ingresos adicionales están cancelados (no aplican)
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Consentimientos */}
