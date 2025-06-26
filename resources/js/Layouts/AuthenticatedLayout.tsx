@@ -1,106 +1,93 @@
 import { PropsWithChildren, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import Logo from '@/assets/Logo.png'
 
 export default function AuthenticatedLayout({ children }: PropsWithChildren) {
   const { auth } = usePage().props as any;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // para padding-left dinámico según el ancho del sidebar
-  const mainPadding = sidebarOpen ? 'md:pl-56' : 'md:pl-16';
+  // padding dinámico en desktop según ancho del sidebar
+  const desktopPadding = sidebarOpen ? 'md:pl-56' : 'md:pl-16';
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-slate-800 flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center h-15 px-6 shadow
-             bg-white text-white">
-        {/* Toggle sidebar */}
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center h-16 px-6 bg-white shadow">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
-          className="text-white focus:outline-none md:block hidden mr-4"
+          className="text-slate-800 focus:outline-none mr-4"
         >
           {sidebarOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="black"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            /* icono cerrar */
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="black"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            /* icono abrir */
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           )}
         </button>
 
-        {/* Logo */}
-        <img src="/images/Logo.png" alt='Logo' className=' h-16 w-auto object-contain'/>
+        <img src="/images/Logo.png" alt="Logo" className="h-10 w-auto object-contain" />
       </header>
+
+      {/* Backdrop sólo en móvil */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       <div className="flex flex-1 pt-16">
         {/* Sidebar */}
         <aside
           className={`
-            bg-white-500 fixed top-16 left-0 bottom-0
-            shadow-md flex flex-col justify-between
-            transition-all duration-300 ease-in-out 
-            ${sidebarOpen ? 'w-56' : 'w-16'}
-            overflow-hidden z-20
+            fixed top-16 bottom-0 left-0 z-40 bg-white shadow-md flex flex-col justify-between overflow-hidden
+
+            /* móvil: deslizante */
+            transition-transform duration-200 ease-out
+            ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
+
+            /* desktop: ancho animado, sin transform */
+            md:translate-x-0
+            md:transition-all md:duration-200 md:ease-out
+            ${sidebarOpen ? 'md:w-56' : 'md:w-16'}
           `}
         >
-          <div>
-            {/* Logo reducida cuando el sidebar está abierto */}
-            {sidebarOpen}
-            <div />
+          <nav className="flex flex-col gap-2 px-2 mt-4">
+            <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
+            <NavLink href={route('solicitud')}  icon="📋" text="Solicitud"  collapsed={!sidebarOpen} />
+            <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
+            <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
+            <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
+          </nav>
 
-            {/* Navegación */}
-            <nav className="flex flex-col gap-2 px-2">
-              <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
-              <NavLink href={route('solicitud')} icon="📋" text="Solicitud" collapsed={!sidebarOpen} />
-              <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
-              <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
-              <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
-            </nav>
-          </div>
-
-          {/* User info y logout */}
-          <div className="px-2 pb-4">
-            {sidebarOpen && (
-              <div className="border-t border-slate-200 pt-4">
-                <div className="text-sm text-slate-700 mb-2">
-                  {auth.user.name}
-                </div>
-                <Link
-                  href={route('logout')}
-                  method="post"
-                  as="button"
-                  className="w-full text-left text-sm text-red-600 hover:underline"
-                >
-                  Cerrar sesión
-                </Link>
-              </div>
-            )}
-          </div>
+          {sidebarOpen && (
+            <div className="px-2 pb-4 border-t border-slate-200">
+              <div className="mt-4 text-sm text-slate-700">{auth.user.name}</div>
+              <Link
+                href={route('logout')}
+                method="post"
+                as="button"
+                className="mt-2 w-full text-left text-sm text-red-600 hover:underline"
+              >
+                Cerrar sesión
+              </Link>
+            </div>
+          )}
         </aside>
 
-        {/* Main content */}
+        {/* Contenido principal */}
         <main
           className={`
-            flex-1 bg-gray-100 min-h-screen transition-all
-            duration-300 ease-in-out ${mainPadding}
-            pt-6
+            flex-1 bg-gray-100 min-h-screen
+            transition-all duration-200 ease-out
+            pl-0 ${desktopPadding} pr-4
           `}
           tabIndex={-1}
         >
@@ -124,31 +111,19 @@ function NavLink({
 }) {
   const { url } = usePage();
   const isActive = url === href;
-
-  const baseClasses = `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 ${
+  const base = `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition duration-150 ${
     isActive
-      ? 'bg-slate-200 text-blue-700 font-semibold border-l-4 border-blue-600 shadow-md cursor-default select-none'
-      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 cursor-pointer'
+      ? 'bg-slate-200 text-blue-700 font-semibold border-l-4 border-blue-600 shadow-md'
+      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
   }`;
-
-  const iconSpan = (
-    <span className="flex items-center justify-center w-10 h-10 text-lg select-none" style={{ lineHeight: 1 }}>
-      {icon}
+  return isActive ? (
+    <span className={base} aria-current="page">
+      <span className="flex items-center justify-center w-10 h-10 text-lg">{icon}</span>
+      {!collapsed && <span className="whitespace-nowrap">{text}</span>}
     </span>
-  );
-
-  if (isActive) {
-    return (
-      <span className={baseClasses} aria-current="page" tabIndex={-1}>
-        {iconSpan}
-        {!collapsed && <span className="whitespace-nowrap">{text}</span>}
-      </span>
-    );
-  }
-
-  return (
-    <Link href={href} className={baseClasses}>
-      {iconSpan}
+  ) : (
+    <Link href={href} className={base}>
+      <span className="flex items-center justify-center w-10 h-10 text-lg">{icon}</span>
       {!collapsed && <span className="whitespace-nowrap">{text}</span>}
     </Link>
   );
