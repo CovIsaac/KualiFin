@@ -101,6 +101,7 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren) {
             <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
             <NavLink href={route('solicitud')} icon="📋" text="Solicitud" collapsed={!sidebarOpen} />
             <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
+            <NavLink href={route('panelRevision')} icon="🔍" text="Panel Revisión" collapsed={!sidebarOpen} />
             <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
             <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
           </nav>

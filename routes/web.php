@@ -33,7 +33,11 @@ Route::get('/reportes', function () {
 Route::get('/nuevoCliente', function () {
     return Inertia::render('nuevoCliente');
 })->name('nuevoCliente');
-Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
 
+Route::get('/panel-revision', function () {
+    return Inertia::render('PanelRevision');
+})->name('panelRevision');
+
+Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
 
 require __DIR__.'/auth.php';
