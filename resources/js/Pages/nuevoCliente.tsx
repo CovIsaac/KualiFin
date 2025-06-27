@@ -1,369 +1,410 @@
 import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircleIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
-export default function NuevoCliente() {
-  const [step, setStep] = useState<1 | 2>(1);
+export default function Solicitud() {
+  const [promotora, setPromotora] = useState<string>('');
+  const [cliente, setCliente] = useState<string>('');
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
 
-  // Cliente
-  const [cliente, setCliente] = useState({ nombre: '', edad: '', sexo: '', estado_civil: '' });
-  const [clienteFiles, setClienteFiles] = useState<{ ine: File | null; curp: File | null; comprobante: File | null }>({
-    ine: null,
-    curp: null,
-    comprobante: null,
-  });
+  const promoters = [
+    { id: 'prom1', name: 'Promotora 1' },
+    { id: 'prom2', name: 'Promotora 2' },
+  ];
+  const clientsByPromoter: Record<string, string[]> = {
+    prom1: ['Cliente A', 'Cliente B'],
+    prom2: ['Cliente C', 'Cliente D'],
+  };
 
-  // Aval
-  const [aval, setAval] = useState({ nombre: '', edad: '', sexo: '', estado_civil: '' });
-  const [avalFiles, setAvalFiles] = useState<{ ine: File | null; curp: File | null; comprobante: File | null }>({
-    ine: null,
-    curp: null,
-    comprobante: null,
-  });
+  const docTypes = ['ine', 'curp', 'comprobante'] as const;
+  type DocKey = typeof docTypes[number];
+
+  const [clienteValidation, setClienteValidation] = useState<
+    Record<DocKey, 'accepted' | 'rejected' | undefined>
+  >({ ine: undefined, curp: undefined, comprobante: undefined });
+  const [avalValidation, setAvalValidation] = useState<
+    Record<DocKey, 'accepted' | 'rejected' | undefined>
+  >({ ine: undefined, curp: undefined, comprobante: undefined });
+
+  const clienteImages: Record<DocKey, string> = {
+    ine: '/img/ejemplo/ine.png',
+    curp: '/img/ejemplo/curp.png',
+    comprobante: '/img/ejemplo/comprobante.png',
+  };
+  const avalImages: Record<DocKey, string> = {
+    ine: '/img/ejemplo/aval-ine.png',
+    curp: '/img/ejemplo/aval-curp.png',
+    comprobante: '/img/ejemplo/aval-comprobante.png',
+  };
+
+  // Comprueba si todos los documentos de cliente y aval han sido aceptados
+  const allClienteAccepted = docTypes.every(
+    (key) => clienteValidation[key] === 'accepted'
+  );
+  const allAvalAccepted = docTypes.every(
+    (key) => avalValidation[key] === 'accepted'
+  );
+  const showCreditoForm = allClienteAccepted && allAvalAccepted;
 
   const inputBase =
     "w-full border border-slate-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition";
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    target: 'cliente' | 'aval'
-  ) {
-    const { name, value } = e.target;
-    if (target === 'cliente') setCliente(c => ({ ...c, [name]: value }));
-    else setAval(a => ({ ...a, [name]: value }));
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, target: 'cliente' | 'aval') {
-    const { name, files } = e.target;
-    if (!files?.[0]) return;
-    const updater = target === 'cliente' ? setClienteFiles : setAvalFiles;
-    updater(f => ({ ...f, [name]: files[0] }));
-  }
-
   return (
     <AuthenticatedLayout>
-      <Head title="Nuevo Cliente – Sistema de Créditos" />
+      <Head title="Nueva Solicitud de Crédito" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Título */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-4"
+          transition={{ duration: 0.4 }}
         >
-          <h1 className="text-2xl font-semibold text-slate-800">
-            {step === 1 ? '➕ Cliente: Datos y Documentos' : '👥 Aval: Datos y Documentos'}
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+            Nueva Solicitud de Crédito
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Paso {step} de 2</p>
+          <p className="text-slate-600">
+            {showCreditoForm
+              ? 'Complete el formulario de crédito'
+              : 'Seleccione promotora y cliente, y valide documentos'}
+          </p>
         </motion.div>
 
-        {/* Progress Bar */}
-        <motion.div className="h-2 bg-slate-200 rounded-full overflow-hidden mb-6">
-          <motion.div
-            className="h-full bg-blue-600"
-            initial={{ width: step === 1 ? '0%' : '50%' }}
-            animate={{ width: step === 1 ? '50%' : '100%' }}
-            transition={{ duration: 0.5 }}
-          />
-        </motion.div>
-
-        <form>
-          <AnimatePresence exitBeforeEnter initial={false}>
-            {step === 1 && (
-              <motion.div
-                key="cliente"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 30 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
+        <AnimatePresence exitBeforeEnter>
+          {!showCreditoForm ? (
+            <motion.div
+              key="validation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Selección de Promotora */}
+              <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="bg-white border border-slate-200 rounded-lg shadow-sm p-6"
               >
-                {/* Datos Básicos Cliente */}
-                <motion.section
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 transition-shadow"
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Promotora<span className="text-red-600">*</span>
+                </label>
+                <select
+                  value={promotora}
+                  onChange={(e) => {
+                    setPromotora(e.target.value);
+                    setCliente('');
+                  }}
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 transition"
                 >
-                  <h2 className="flex items-center text-lg font-medium text-slate-700 mb-4 border-b border-slate-100 pb-2">
-                    <span className="text-xl mr-2">👤</span> Datos del Cliente
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div className="sm:col-span-2">
-                      <label htmlFor="nombre" className="block text-sm font-medium text-slate-600 mb-1">
-                        Nombre completo<span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        id="nombre"
-                        name="nombre"
-                        value={cliente.nombre}
-                        onChange={e => handleChange(e, 'cliente')}
-                        placeholder="Ej. Juan Pérez López"
-                        className={inputBase}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="edad" className="block text-sm font-medium text-slate-600 mb-1">
-                        Edad<span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        id="edad"
-                        name="edad"
-                        type="number"
-                        min="18"
-                        max="100"
-                        value={cliente.edad}
-                        onChange={e => handleChange(e, 'cliente')}
-                        placeholder="18"
-                        className={inputBase}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="sexo" className="block text-sm font-medium text-slate-600 mb-1">
-                        Sexo<span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        id="sexo"
-                        name="sexo"
-                        value={cliente.sexo}
-                        onChange={e => handleChange(e, 'cliente')}
-                        className={inputBase}
-                      >
-                        <option value="">Seleccione…</option>
-                        <option value="masculino">Masculino</option>
-                        <option value="femenino">Femenino</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="estado_civil" className="block text-sm font-medium text-slate-600 mb-1">
-                        Estado Civil<span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        id="estado_civil"
-                        name="estado_civil"
-                        value={cliente.estado_civil}
-                        onChange={e => handleChange(e, 'cliente')}
-                        className={inputBase}
-                      >
-                        <option value="">Seleccione…</option>
-                        <option value="soltero">Soltero</option>
-                        <option value="casado">Casado</option>
-                        <option value="union_libre">Unión Libre</option>
-                        <option value="viudo">Viudo</option>
-                        <option value="divorciado">Divorciado</option>
-                      </select>
-                    </div>
-                  </div>
-                </motion.section>
+                  <option value="">-- Seleccione una promotora --</option>
+                  {promoters.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </motion.section>
 
-                {/* Documentos Cliente */}
+              {/* Selección de Cliente */}
+              {promotora && (
                 <motion.section
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 transition-shadow"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  className="bg-white border border-slate-200 rounded-lg shadow-sm p-6"
                 >
-                  <h2 className="flex items-center text-lg font-medium text-slate-700 mb-4 border-b border-slate-100 pb-2">
-                    <span className="text-xl mr-2">📎</span> Documentos del Cliente
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {(['ine', 'curp', 'comprobante'] as const).map(key => {
-                      const labelText =
-                        key === 'ine'
-                          ? 'INE'
-                          : key === 'curp'
-                          ? 'CURP'
-                          : 'Comprobante de Domicilio';
-                      return (
-                        <motion.label
-                          key={key}
-                          htmlFor={key}
-                          whileHover={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}
-                          className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer transition-all"
-                        >
-                          <input
-                            id={key}
-                            name={key}
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={e => handleFileChange(e, 'cliente')}
-                            className="sr-only"
-                          />
-                          {clienteFiles[key] ? (
-                            <motion.div
-                              initial={{ scale: 0.9, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex flex-col items-center text-blue-600"
-                            >
-                              <CheckCircleIcon className="w-7 h-7 mb-1" />
-                              <span className="text-sm truncate">{clienteFiles[key]!.name}</span>
-                            </motion.div>
-                          ) : (
-                            <div className="flex flex-col items-center text-slate-500">
-                              <CloudArrowUpIcon className="w-7 h-7 mb-1" />
-                              <span className="text-sm">{labelText}</span>
-                            </div>
-                          )}
-                        </motion.label>
-                      );
-                    })}
-                  </div>
-                </motion.section>
-              </motion.div>
-            )}
-
-            {step === 2 && (
-              <motion.div
-                key="aval"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
-              >
-                {/* Datos Básicos Aval */}
-                <motion.section
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 transition-shadow"
-                >
-                  <h2 className="flex items-center text-lg font-medium text-slate-700 mb-4 border-b border-slate-100 pb-2">
-                    <span className="text-xl mr-2">👤</span> Datos del Aval
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {['nombre', 'edad', 'sexo', 'estado_civil'].map(field => (
-                      <div key={field} className={field === 'nombre' ? 'sm:col-span-2' : ''}>
-                        <label className="block text-sm font-medium text-slate-600 mb-1">
-                          {field === 'nombre'
-                            ? 'Nombre completo'
-                            : field === 'edad'
-                            ? 'Edad'
-                            : field === 'sexo'
-                            ? 'Sexo'
-                            : 'Estado Civil'}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        {field === 'sexo' || field === 'estado_civil' ? (
-                          <select
-                            id={field}
-                            name={field}
-                            value={(aval as any)[field]}
-                            onChange={e => handleChange(e, 'aval')}
-                            className={inputBase}
-                          >
-                            <option value="">Seleccione…</option>
-                            {field === 'sexo' ? (
-                              <>
-                                <option value="masculino">Masculino</option>
-                                <option value="femminino">Femenino</option>
-                              </>
-                            ) : (
-                              <>
-                                <option value="soltero">Soltero</option>
-                                <option value="casado">Casado</option>
-                                <option value="union_libre">Unión Libre</option>
-                                <option value="viudo">Viudo</option>
-                                <option value="divorciado">Divorciado</option>
-                              </>
-                            )}
-                          </select>
-                        ) : (
-                          <input
-                            id={field}
-                            name={field}
-                            type={field === 'edad' ? 'number' : 'text'}
-                            min={field === 'edad' ? 18 : undefined}
-                            max={field === 'edad' ? 100 : undefined}
-                            value={(aval as any)[field]}
-                            onChange={e => handleChange(e, 'aval')}
-                            placeholder={
-                              field === 'nombre' ? 'Ej. Ana Gómez Rivera' : field === 'edad' ? '18' : ''
-                            }
-                            className={inputBase}
-                          />
-                        )}
-                      </div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Cliente prospectado<span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={cliente}
+                    onChange={(e) => setCliente(e.target.value)}
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 transition"
+                  >
+                    <option value="">-- Seleccione un cliente --</option>
+                    {clientsByPromoter[promotora]?.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </motion.section>
+              )}
 
-                {/* Documentos Aval */}
+              {/* Documentos y validación */}
+              {cliente && (
                 <motion.section
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 transition-shadow"
+                  key="docs"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                  className="grid grid-cols-3 gap-8"
                 >
-                  <h2 className="flex items-center text-lg font-medium text-slate-700 mb-4 border-b border-slate-100 pb-2">
-                    <span className="text-xl mr-2">📎</span> Documentos del Aval
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {(['ine', 'curp', 'comprobante'] as const).map(key => {
-                      const labelText =
-                        key === 'ine'
-                          ? 'INE'
-                          : key === 'curp'
-                          ? 'CURP'
-                          : 'Comprobante de Domicilio';
-                      return (
-                        <motion.label
-                          key={key}
-                          htmlFor={`aval_${key}`}
-                          whileHover={{ boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}
-                          className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer transition-all"
-                        >
-                          <input
-                            id={`aval_${key}`}
-                            name={key}
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={e => handleFileChange(e, 'aval')}
-                            className="sr-only"
-                          />
-                          {avalFiles[key] ? (
-                            <motion.div
-                              initial={{ scale: 0.9, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex flex-col items-center text-blue-600"
-                            >
-                              <CheckCircleIcon className="w-7 h-7 mb-1" />
-                              <span className="text-sm truncate">{avalFiles[key]!.name}</span>
-                            </motion.div>
-                          ) : (
-                            <div className="flex flex-col items-center text-slate-500">
-                              <CloudArrowUpIcon className="w-7 h-7 mb-1" />
-                              <span className="text-sm">{labelText}</span>
+                  {/** Documentos del Cliente **/}
+                  <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-6">
+                      📋 Documentos de {cliente}
+                    </h3>
+                    <div className="grid grid-cols-1 gap-6">
+                      {docTypes.map((key) => {
+                        const status = clienteValidation[key];
+                        const borderClass =
+                          status === 'accepted'
+                            ? 'border-4 border-green-500'
+                            : status === 'rejected'
+                            ? 'border-4 border-red-500'
+                            : 'border border-slate-200';
+                        return (
+                          <motion.div
+                            key={key}
+                            whileHover={{ scale: 1.02 }}
+                            className={`flex flex-col items-center bg-slate-50 p-4 rounded-lg shadow-sm transition ${borderClass}`}
+                          >
+                            <img
+                              src={clienteImages[key]}
+                              alt={key}
+                              onClick={() => setPreviewSrc(clienteImages[key])}
+                              className="w-full h-56 object-contain rounded-md mb-4 cursor-zoom-in"
+                            />
+                            <span className="font-medium text-slate-700 mb-4">
+                              {key === 'ine'
+                                ? 'INE'
+                                : key === 'curp'
+                                ? 'CURP'
+                                : 'Comprobante de Domicilio'}
+                            </span>
+                            <div className="flex gap-4">
+                              <button
+                                onClick={() =>
+                                  setClienteValidation((v) => ({
+                                    ...v,
+                                    [key]: 'accepted',
+                                  }))
+                                }
+                                className="p-1 rounded-full hover:bg-green-100 transition"
+                              >
+                                <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setClienteValidation((v) => ({
+                                    ...v,
+                                    [key]: 'rejected',
+                                  }))
+                                }
+                                className="p-1 rounded-full hover:bg-red-100 transition"
+                              >
+                                <XCircleIcon className="w-6 h-6 text-red-600" />
+                              </button>
                             </div>
-                          )}
-                        </motion.label>
-                      );
-                    })}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/** Documentos del Aval **/}
+                  <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-6">
+                      📋 Documentos del Aval
+                    </h3>
+                    <div className="grid grid-cols-1 gap-6">
+                      {docTypes.map((key) => {
+                        const status = avalValidation[key];
+                        const borderClass =
+                          status === 'accepted'
+                            ? 'border-4 border-green-500'
+                            : status === 'rejected'
+                            ? 'border-4 border-red-500'
+                            : 'border border-slate-200';
+                        return (
+                          <motion.div
+                            key={key}
+                            whileHover={{ scale: 1.02 }}
+                            className={`flex flex-col items-center bg-slate-50 p-4 rounded-lg shadow-sm transition ${borderClass}`}
+                          >
+                            <img
+                              src={avalImages[key]}
+                              alt={`aval-${key}`}
+                              onClick={() => setPreviewSrc(avalImages[key])}
+                              className="w-full h-56 object-contain rounded-md mb-4 cursor-zoom-in"
+                            />
+                            <span className="font-medium text-slate-700 mb-4">
+                              {key === 'ine'
+                                ? 'INE'
+                                : key === 'curp'
+                                ? 'CURP'
+                                : 'Comprobante de Domicilio'}
+                            </span>
+                            <div className="flex gap-4">
+                              <button
+                                onClick={() =>
+                                  setAvalValidation((v) => ({
+                                    ...v,
+                                    [key]: 'accepted',
+                                  }))
+                                }
+                                className="p-1 rounded-full hover:bg-green-100 transition"
+                              >
+                                <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setAvalValidation((v) => ({
+                                    ...v,
+                                    [key]: 'rejected',
+                                  }))
+                                }
+                                className="p-1 rounded-full hover:bg-red-100 transition"
+                              >
+                                <XCircleIcon className="w-6 h-6 text-red-600" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </motion.section>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+            </motion.div>
+          ) : (
+            <motion.section
+              key="new-credit"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 space-y-6"
+            >
+              <h2 className="text-xl font-semibold text-slate-800">
+                📝 Formulario de Nuevo Crédito
+              </h2>
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Información Laboral */}
+                <div className="md:col-span-2 space-y-4">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Ocupación
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Desarrollador Web"
+                    className={inputBase}
+                  />
+                  <label className="block text-sm font-medium text-slate-700">
+                    Empresa
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nombre de la Empresa"
+                    className={inputBase}
+                  />
+                  <label className="block text-sm font-medium text-slate-700">
+                    Ingresos Mensuales
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    className={inputBase}
+                  />
+                </div>
+                {/* Detalles de Crédito */}
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Monto Solicitado
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    className={inputBase}
+                  />
+                  <label className="block text-sm font-medium text-slate-700">
+                    Plazo (meses)
+                  </label>
+                  <select className={inputBase}>
+                    <option>6</option>
+                    <option>12</option>
+                    <option>18</option>
+                    <option>24</option>
+                  </select>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Propósito
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Descripción"
+                    className={`${inputBase} resize-none`}
+                  />
+                </div>
+                {/* Referencias */}
+                <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Ref. 1 - Nombre
+                    </label>
+                    <input type="text" className={inputBase} />
+                    <label className="block text-sm font-medium text-slate-700">
+                      Ref. 1 - Teléfono
+                    </label>
+                    <input type="tel" className={inputBase} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Ref. 2 - Nombre
+                    </label>
+                    <input type="text" className={inputBase} />
+                    <label className="block text-sm font-medium text-slate-700">
+                      Ref. 2 - Teléfono
+                    </label>
+                    <input type="tel" className={inputBase} />
+                  </div>
+                </div>
+                {/* Acciones */}
+                <div className="md:col-span-2 flex justify-end gap-4 pt-4">
+                  <button
+                    type="button"
+                    className="px-6 py-2 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100 transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  >
+                    Enviar Solicitud
+                  </button>
+                </div>
+              </form>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
-          {/* Navegación */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 border-t border-slate-200 pt-6 mt-2">
-            <button
-              type="button"
-              onClick={() => (step === 1 ? window.history.back() : setStep(1))}
-              className="px-5 py-2 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-100 transition"
+        {/* Modal de vista previa */}
+        <AnimatePresence>
+          {previewSrc && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+              onClick={() => setPreviewSrc(null)}
             >
-              {step === 1 ? 'Cancelar' : 'Atrás'}
-            </button>
-            <button
-              type="button"
-              onClick={() => (step === 1 ? setStep(2) : alert('Cliente y Aval listos'))}
-              className={`px-5 py-2 rounded-md font-medium transition shadow-sm ${
-                step === 1
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-green-600 text-white hover:bg-green-700'
-              }`}
-            >
-              {step === 1 ? 'Continuar' : 'Guardar Cliente'}
-            </button>
-          </div>
-        </form>
+              <motion.img
+                src={previewSrc}
+                alt="Preview"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-full max-h-[90vh] object-contain rounded"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AuthenticatedLayout>
   );
