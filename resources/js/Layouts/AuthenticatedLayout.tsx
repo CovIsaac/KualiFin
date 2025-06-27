@@ -1,7 +1,14 @@
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, ReactNode, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
-export default function AuthenticatedLayout({ children }: PropsWithChildren) {
+interface AuthenticatedLayoutProps extends PropsWithChildren {
+  header?: ReactNode;
+}
+
+export default function AuthenticatedLayout({
+  header,
+  children,
+}: AuthenticatedLayoutProps) {
   const { auth } = usePage().props as any;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -10,7 +17,7 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-slate-800 flex flex-col">
-      {/* Header */}
+      {/* Header general */}
       <header className="fixed top-0 left-0 right-0 z-40 flex items-center h-16 px-6 bg-white shadow">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -18,22 +25,26 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren) {
           className="text-slate-800 focus:outline-none mr-4"
         >
           {sidebarOpen ? (
-            /* icono cerrar */
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
               viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           ) : (
-            /* icono abrir */
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
               viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           )}
         </button>
-
         <img src="/images/Logo.png" alt="Logo" className="h-10 w-auto object-contain" />
       </header>
+
+      {/* Si la página pasa un header, lo mostramos debajo del header general */}
+      {header && (
+        <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-slate-200 px-6 py-4">
+          {header}
+        </div>
+      )}
 
       {/* Backdrop sólo en móvil */}
       {sidebarOpen && (
@@ -43,25 +54,20 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren) {
         />
       )}
 
-      <div className="flex flex-1 pt-16">
+      <div className={`flex flex-1 pt-${header ? '24' : '16'}`}>
         {/* Sidebar */}
         <aside
           className={`
-            fixed top-16 bottom-0 left-0 z-40 bg-white shadow-md flex flex-col justify-between overflow-hidden
-
-            /* móvil: deslizante */
+            fixed top-${header ? '24' : '16'} bottom-0 left-0 z-40 bg-white shadow-md flex flex-col justify-between overflow-hidden
             transition-transform duration-200 ease-out
             ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
-
-            /* desktop: ancho animado, sin transform */
-            md:translate-x-0
-            md:transition-all md:duration-200 md:ease-out
+            md:translate-x-0 md:transition-all md:duration-200 md:ease-out
             ${sidebarOpen ? 'md:w-56' : 'md:w-16'}
           `}
         >
           <nav className="flex flex-col gap-2 px-2 mt-4">
             <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
-            <NavLink href={route('solicitud')}  icon="📋" text="Solicitud"  collapsed={!sidebarOpen} />
+            <NavLink href={route('solicitud')} icon="📋" text="Solicitud" collapsed={!sidebarOpen} />
             <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
             <NavLink href={route('panelRevision')} icon="🔍" text="Panel Revisión" collapsed={!sidebarOpen} />
             <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
@@ -89,6 +95,7 @@ export default function AuthenticatedLayout({ children }: PropsWithChildren) {
             flex-1 bg-gray-100 min-h-screen
             transition-all duration-200 ease-out
             pl-0 ${desktopPadding} pr-4
+            ${header ? 'pt-16' : 'pt-0'}
           `}
           tabIndex={-1}
         >

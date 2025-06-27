@@ -71,7 +71,7 @@ export default function Solicitud() {
           </p>
         </motion.div>
 
-        <AnimatePresence exitBeforeEnter>
+        <AnimatePresence mode='wait'>
           {!showCreditoForm ? (
             <motion.div
               key="validation"

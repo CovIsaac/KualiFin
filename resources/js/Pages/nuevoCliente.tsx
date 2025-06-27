@@ -71,7 +71,7 @@ export default function NuevoCliente() {
         </motion.div>
 
         <form>
-          <AnimatePresence exitBeforeEnter initial={false}>
+          <AnimatePresence mode='wait' initial={false}>
             {step === 1 && (
               <motion.div
                 key="cliente"
