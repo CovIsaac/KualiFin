@@ -1,39 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { useNuevoCliente } from '@/Hooks/useNuevoCliente'; // ajusta la ruta según corresponda
 
 export default function NuevoCliente() {
-  const [form, setForm] = useState({
-    nombre: '',
-    edad: '',
-    sexo: '',
-    estado_civil: '',
-    ine: null as File | null,
-    curp: null as File | null,
-    comprobante: null as File | null,
-  });
+  const {
+  form,
+  submitting,
+  dragOver,
+  setDragOver,
+  handleChange,
+  handleDrop,
+  setSubmitting,
+  handleSubmit, // <--- Asegúrate de incluir esto
+} = useNuevoCliente();
 
-  const [submitting, setSubmitting] = useState(false);
-  const [dragOver, setDragOver] = useState<string | null>(null);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const { name, value, files } = e.target as HTMLInputElement;
-    if (files && files.length > 0) {
-      setForm((prev) => ({ ...prev, [name]: files[0] }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-  }
-
-  function handleDrop(e: React.DragEvent, fieldName: string) {
-    e.preventDefault();
-    setDragOver(null);
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      setForm((prev) => ({ ...prev, [fieldName]: files[0] }));
-    }
-  }
-
+  // Mantengo tus clases originales intactas
   const inputBase = `
     w-full border border-slate-200/60 rounded-xl px-4 py-3 text-slate-700 
     bg-white/80 backdrop-blur-sm shadow-sm
@@ -56,22 +39,20 @@ export default function NuevoCliente() {
       <Head title="Nuevo Cliente - Sistema de Créditos" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header súper moderno con efectos */}
+        {/* Header y sección Datos Básicos igual */}
         <div className="mb-8 relative">
-          {/* Efectos de fondo */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-indigo-500/10 rounded-3xl blur-3xl"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/20 rounded-3xl"></div>
-          
+
           <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-blue-500/20 border border-white/30">
             <div className="flex items-center gap-6 mb-6">
-              {/* Icono animado */}
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                 <div className="relative w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl transform group-hover:scale-105 transition-all duration-300">
                   <span className="animate-pulse">👤</span>
                 </div>
               </div>
-              
+
               <div className="flex-1">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
                   Nuevo Cliente
@@ -82,32 +63,29 @@ export default function NuevoCliente() {
               </div>
             </div>
 
-            {/* Barra de progreso decorativa */}
             <div className="w-full h-2 bg-slate-200/50 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
             </div>
           </div>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSubmitting(true);
-            setTimeout(() => {
-              alert('Cliente registrado correctamente');
-              setSubmitting(false);
-            }, 1500);
-          }}
+        {/* Aquí tu formulario sin cambiar nada de estructura */}
+        <form onSubmit={(handleSubmit)} 
+            // => {
+            // e.preventDefault();
+            // setSubmitting(true);
+            // setTimeout(() => {
+            //   alert('Cliente registrado correctamente');
+            //   setSubmitting(false);
+            // }, 1500);
           className="space-y-8"
         >
-          {/* Datos Básicos con efectos glassmorphism */}
+          {/* Datos Básicos */}
           <section className="relative group">
-            {/* Efectos de fondo */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-3xl blur-2xl group-hover:blur-xl transition-all duration-500"></div>
             <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/30 rounded-3xl"></div>
-            
+
             <div className="relative bg-white/80 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-blue-500/10 p-8 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500">
-              {/* Header de sección */}
               <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gradient-to-r from-blue-200/50 to-purple-200/50">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl blur-md opacity-50"></div>
@@ -122,9 +100,8 @@ export default function NuevoCliente() {
                   <p className="text-slate-600 font-medium">Información personal del cliente</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nombre completo */}
                 <div className="md:col-span-2 group">
                   <label htmlFor="nombre" className="block text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></span>
@@ -143,8 +120,7 @@ export default function NuevoCliente() {
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   </div>
                 </div>
-                
-                {/* Edad */}
+
                 <div className="group">
                   <label htmlFor="edad" className="block text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"></span>
@@ -168,20 +144,19 @@ export default function NuevoCliente() {
                     </div>
                   </div>
                 </div>
-                
-                {/* Sexo */}
+
                 <div className="group">
                   <label htmlFor="sexo" className="block text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full"></span>
                     Sexo <span className="text-red-500 animate-pulse">*</span>
                   </label>
                   <div className="relative">
-                    <select 
-                      id="sexo" 
-                      name="sexo" 
-                      value={form.sexo} 
-                      onChange={handleChange} 
-                      required 
+                    <select
+                      id="sexo"
+                      name="sexo"
+                      value={form.sexo}
+                      onChange={handleChange}
+                      required
                       className={`${selectBase} group-hover:shadow-lg group-hover:scale-[1.02]`}
                     >
                       <option value="">Seleccione...</option>
@@ -190,8 +165,7 @@ export default function NuevoCliente() {
                     </select>
                   </div>
                 </div>
-                
-                {/* Estado Civil */}
+
                 <div className="md:col-span-2 group">
                   <label htmlFor="estado_civil" className="block text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></span>
@@ -219,14 +193,12 @@ export default function NuevoCliente() {
             </div>
           </section>
 
-          {/* Documentos con efectos súper modernos */}
+          {/* Documentos */}
           <section className="relative group">
-            {/* Efectos de fondo */}
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-amber-500/5 rounded-3xl blur-2xl group-hover:blur-xl transition-all duration-500"></div>
             <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/30 rounded-3xl"></div>
-            
+
             <div className="relative bg-white/80 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl shadow-orange-500/10 p-8 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500">
-              {/* Header de sección */}
               <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gradient-to-r from-orange-200/50 to-amber-200/50">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl blur-md opacity-50"></div>
@@ -241,7 +213,7 @@ export default function NuevoCliente() {
                   <p className="text-slate-600 font-medium">Adjunte los documentos necesarios</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {(['ine', 'curp', 'comprobante'] as const).map((key, index) => {
                   const labelText =
@@ -250,17 +222,17 @@ export default function NuevoCliente() {
                       : key === 'curp'
                       ? 'CURP'
                       : 'Comprobante de domicilio';
-                  
+
                   const gradients = [
                     'from-blue-500 to-cyan-500',
                     'from-purple-500 to-pink-500',
-                    'from-green-500 to-emerald-500'
+                    'from-green-500 to-emerald-500',
                   ];
-                  
+
                   const bgGradients = [
                     'from-blue-50 to-cyan-50',
                     'from-purple-50 to-pink-50',
-                    'from-green-50 to-emerald-50'
+                    'from-green-50 to-emerald-50',
                   ];
 
                   return (
@@ -269,8 +241,7 @@ export default function NuevoCliente() {
                         <span className={`w-2 h-2 bg-gradient-to-r ${gradients[index]} rounded-full`}></span>
                         {labelText} <span className="text-red-500 animate-pulse">*</span>
                       </label>
-                      
-                      {/* Input oculto */}
+
                       <input
                         id={key}
                         name={key}
@@ -280,8 +251,7 @@ export default function NuevoCliente() {
                         required
                         className="sr-only"
                       />
-                      
-                      {/* Zona de drop súper moderna */}
+
                       <label
                         htmlFor={key}
                         onDragOver={(e) => {
@@ -293,44 +263,49 @@ export default function NuevoCliente() {
                         className={`
                           relative block w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer 
                           transition-all duration-300 overflow-hidden group-hover:scale-105
-                          ${dragOver === key 
-                            ? `border-blue-500 bg-gradient-to-br ${bgGradients[index]} scale-105` 
-                            : form[key] 
-                            ? `border-green-500 bg-gradient-to-br from-green-50 to-emerald-50` 
-                            : `border-slate-300 bg-gradient-to-br ${bgGradients[index]} hover:border-slate-400`
+                          ${
+                            dragOver === key
+                              ? `border-blue-500 bg-gradient-to-br ${bgGradients[index]} scale-105`
+                              : form[key]
+                              ? `border-green-500 bg-gradient-to-br from-green-50 to-emerald-50`
+                              : `border-slate-300 bg-gradient-to-br ${bgGradients[index]} hover:border-slate-400`
                           }
                         `}
                       >
-                        {/* Efectos de fondo */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${gradients[index]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                        
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${gradients[index]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                        ></div>
+
                         <div className="relative h-full flex flex-col items-center justify-center p-4 text-center">
                           {form[key] ? (
                             <>
-                              <div className={`w-12 h-12 bg-gradient-to-br ${gradients[index]} rounded-xl flex items-center justify-center text-white text-2xl mb-2 shadow-lg animate-bounce`}>
+                              <div
+                                className={`w-12 h-12 bg-gradient-to-br ${gradients[index]} rounded-xl flex items-center justify-center text-white text-2xl mb-2 shadow-lg animate-bounce`}
+                              >
                                 ✓
                               </div>
                               <p className="text-sm font-bold text-slate-700 truncate w-full">
                                 {form[key]!.name}
                               </p>
-                              <p className="text-xs text-green-600 font-medium">Archivo cargado</p>
+                              <p className="text-xs text-green-600 font-medium">
+                                Archivo cargado
+                              </p>
                             </>
                           ) : (
                             <>
-                              <div className={`w-12 h-12 bg-gradient-to-br ${gradients[index]} rounded-xl flex items-center justify-center text-white text-2xl mb-2 shadow-lg group-hover:animate-pulse`}>
+                              <div
+                                className={`w-12 h-12 bg-gradient-to-br ${gradients[index]} rounded-xl flex items-center justify-center text-white text-2xl mb-2 shadow-lg group-hover:animate-pulse`}
+                              >
                                 📂
                               </div>
                               <p className="text-sm font-bold text-slate-700 mb-1">
                                 Seleccionar archivo
                               </p>
-                              <p className="text-xs text-slate-500 font-medium">
-                                o arrastra aquí
-                              </p>
+                              <p className="text-xs text-slate-500 font-medium">o arrastra aquí</p>
                             </>
                           )}
                         </div>
-                        
-                        {/* Efecto de brillo */}
+
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                       </label>
                     </div>
@@ -340,7 +315,7 @@ export default function NuevoCliente() {
             </div>
           </section>
 
-          {/* Acciones con efectos modernos */}
+          {/* Acciones */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 to-blue-500/5 rounded-2xl blur-xl"></div>
             <div className="relative flex flex-col sm:flex-row justify-end gap-4 p-6 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
@@ -351,26 +326,25 @@ export default function NuevoCliente() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-100 to-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center gap-2">
-                  <span>↩️</span>
-                  Cancelar
+                  <span>↩️</span>Cancelar
                 </span>
               </button>
-              
+
               <button
                 type="submit"
                 disabled={submitting}
                 className={`
                   group relative px-8 py-3 rounded-xl font-bold transition-all duration-300 overflow-hidden
-                  ${submitting 
-                    ? 'bg-gradient-to-r from-slate-400 to-slate-500 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105'
+                  ${
+                    submitting
+                      ? 'bg-gradient-to-r from-slate-400 to-slate-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105'
                   }
                   text-white shadow-xl
                 `}
               >
-                {/* Efecto de brillo */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                
+
                 <span className="relative flex items-center gap-2">
                   {submitting ? (
                     <>
@@ -379,8 +353,7 @@ export default function NuevoCliente() {
                     </>
                   ) : (
                     <>
-                      <span>💾</span>
-                      Guardar Cliente
+                      <span>💾</span>Guardar Cliente
                     </>
                   )}
                 </span>

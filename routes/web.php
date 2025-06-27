@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ClienteController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
 
 Route::get('/', function () {
     return redirect('/login');
@@ -30,5 +33,7 @@ Route::get('/reportes', function () {
 Route::get('/nuevoCliente', function () {
     return Inertia::render('nuevoCliente');
 })->name('nuevoCliente');
+Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
+
 
 require __DIR__.'/auth.php';
