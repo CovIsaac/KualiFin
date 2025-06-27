@@ -13,6 +13,8 @@ export default function NuevoCliente() {
   handleDrop,
   setSubmitting,
   handleSubmit, // <--- Asegúrate de incluir esto
+  successMessage,
+  errorMessage,
 } = useNuevoCliente();
 
 
@@ -70,16 +72,19 @@ export default function NuevoCliente() {
         </div>
 
         {/* Aquí tu formulario sin cambiar nada de estructura */}
-        <form onSubmit={(handleSubmit)} 
-            // => {
-            // e.preventDefault();
-            // setSubmitting(true);
-            // setTimeout(() => {
-            //   alert('Cliente registrado correctamente');
-            //   setSubmitting(false);
-            // }, 1500);
-          className="space-y-8"
-        >
+        <form onSubmit={(handleSubmit)}className="space-y-8">
+          {successMessage && (
+            <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-xl shadow mb-6">
+              {successMessage}
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-xl shadow mb-6">
+              {errorMessage}
+            </div>
+)}
+
           {/* Datos Básicos */}
           <section className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-3xl blur-2xl group-hover:blur-xl transition-all duration-500"></div>

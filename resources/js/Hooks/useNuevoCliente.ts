@@ -4,6 +4,8 @@ import { useForm } from '@inertiajs/react';
 export function useNuevoCliente() {
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: form, setData, post } = useForm<{
     nombre: string;
@@ -48,9 +50,17 @@ export function useNuevoCliente() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
 
     post(route('clientes.store'), {
       forceFormData: true,
+      onSuccess: () => {
+        setSuccessMessage('✅ Cliente registrado correctamente.');
+      },
+      onError: () => {
+        setErrorMessage('❌ Hubo un error al registrar al cliente. Revisa los campos.');
+      },
       onFinish: () => setSubmitting(false),
     });
   };
@@ -64,5 +74,7 @@ export function useNuevoCliente() {
     handleDrop,
     setSubmitting,
     handleSubmit,
+    successMessage,
+    errorMessage,
   };
 }
