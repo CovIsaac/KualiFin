@@ -31,4 +31,9 @@ Route::get('/nuevoCliente', function () {
     return Inertia::render('nuevoCliente');
 })->name('nuevoCliente');
 
+Route::get('/panel-revision', function () {
+    return Inertia::render('PanelRevision');
+})->name('panelRevision');
+
+
 require __DIR__.'/auth.php';
