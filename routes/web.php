@@ -31,7 +31,7 @@ Route::get('/nuevoCliente', function () {
     return Inertia::render('nuevoCliente');
 })->name('nuevoCliente');
 
-Route::get('/panel-revision', function () {
+Route::get('/panelRevision', function () {
     return Inertia::render('PanelRevision');
 })->name('panelRevision');
 
