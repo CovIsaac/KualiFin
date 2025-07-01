@@ -29,6 +29,66 @@ export default function Solicitud() {
     Record<DocKey, 'accepted' | 'rejected' | undefined>
   >({ ine: undefined, curp: undefined, comprobante: undefined });
 
+  const [domicilio, setDomicilio] = useState({
+    calle: '',
+    numero: '',
+    interior: '',
+    colonia: '',
+    cp: '',
+    tipoVivienda: '',
+    municipioEstado: '',
+    tiempoResidencia: '',
+    montoMensual: '',
+    telFijo: '',
+    telCelular: '',
+  });
+
+  const [ocupacion, setOcupacion] = useState({
+    actividad: '',
+    domSecundarioCalle: '',
+    domSecundarioColonia: '',
+    domSecundarioMunicipio: '',
+    domSecundarioNumero: '',  
+    telefono: '',
+    empresa: '',
+    antiguedad: '',
+    monto: '',
+    periodo: '',
+    ingresosAdicionales: false,
+    ingresoConcepto: '',
+    ingresoMonto: '',
+    ingresoFrecuencia: '',
+  });
+
+  function formatPhoneInput(value: string) {
+    let digits = value.replace(/\D/g, '').slice(0, 10);
+    if (digits.length > 6)
+      return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    if (digits.length > 3)
+      return `${digits.slice(0,3)}-${digits.slice(3)}`;
+    return digits;
+  }
+
+  // Validación de campos imprescindibles
+  const ocupacionValida = !!(
+    ocupacion.actividad.trim() &&
+    ocupacion.domSecundarioCalle.trim() &&
+    ocupacion.domSecundarioNumero.trim() &&
+    ocupacion.domSecundarioColonia.trim() &&
+    ocupacion.domSecundarioMunicipio.trim() &&
+    ocupacion.telefono.replace(/\D/g, '').length === 10 &&
+    ocupacion.antiguedad.trim() &&
+    ocupacion.monto.trim() &&
+    ocupacion.periodo
+  ) && (
+    !ocupacion.ingresosAdicionales ||
+    (
+      ocupacion.ingresoConcepto.trim() &&
+      ocupacion.ingresoMonto.trim() &&
+      ocupacion.ingresoFrecuencia.trim()
+    )
+  );
+
   const clienteImages: Record<DocKey, string> = {
     ine: '/img/ejemplo/ine.png',
     curp: '/img/ejemplo/curp.png',
@@ -454,93 +514,330 @@ export default function Solicitud() {
                   </div>
                   
                   <form className="space-y-8">
-                    {/* Información Laboral */}
+                    {/* Domicilio */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.2 }}
-                      className="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 rounded-2xl p-6 border border-blue-200/30"
+                      className="bg-gradient-to-br from-blue-50/60 to-cyan-50/80 rounded-2xl p-8 border border-blue-200/30 shadow-lg mb-10"
                     >
-                      <h3 className="text-lg font-bold text-blue-700 mb-6 flex items-center gap-2">
-                        <span className="text-xl">💼</span> Información Laboral
+                      <h3 className="text-xl sm:text-2xl font-bold text-blue-700 mb-8 flex items-center gap-3">
+                        <span className="text-2xl">🏠</span>
+                        Domicilio del Solicitante
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Ocupación<span className="text-red-500 ml-1">*</span>
-                          </label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Calle */}
+                        <div className="col-span-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Calle <span className="text-red-500">*</span></label>
                           <input
                             type="text"
-                            placeholder="Ej. Desarrollador Web"
                             className={inputBase}
+                            value={domicilio.calle}
+                            onChange={e => setDomicilio(d => ({ ...d, calle: e.target.value }))}
+                            required
+                            placeholder="Ej. Av. Reforma"
                           />
                         </div>
+                        {/* Número */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Empresa<span className="text-red-500 ml-1">*</span>
-                          </label>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">No. <span className="text-red-500">*</span></label>
                           <input
                             type="text"
-                            placeholder="Nombre de la Empresa"
                             className={inputBase}
+                            value={domicilio.numero}
+                            onChange={e => setDomicilio(d => ({ ...d, numero: e.target.value }))}
+                            required
+                            placeholder="Ej. 123"
                           />
                         </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Ingresos Mensuales<span className="text-red-500 ml-1">*</span>
-                          </label>
+                        {/* Interior */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Int.</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={domicilio.interior}
+                            onChange={e => setDomicilio(d => ({ ...d, interior: e.target.value }))}
+                            placeholder="Ej. 2B"
+                          />
+                        </div>
+                        {/* Colonia */}
+                        <div className="col-span-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Colonia <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={domicilio.colonia}
+                            onChange={e => setDomicilio(d => ({ ...d, colonia: e.target.value }))}
+                            required
+                            placeholder="Ej. Centro"
+                          />
+                        </div>
+                        {/* Código Postal */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Código Postal <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={domicilio.cp}
+                            onChange={e => setDomicilio(d => ({ ...d, cp: e.target.value }))}
+                            required
+                            placeholder="Ej. 06000"
+                          />
+                        </div>
+                        {/* Tipo de Vivienda */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Tipo de Vivienda <span className="text-red-500">*</span></label>
+                          <select
+                            className={inputBase}
+                            value={domicilio.tipoVivienda}
+                            onChange={e => setDomicilio(d => ({ ...d, tipoVivienda: e.target.value }))}
+                            required
+                          >
+                            <option value="">Selecciona...</option>
+                            <option value="Propia">Propia</option>
+                            <option value="Rentada">Rentada</option>
+                            <option value="Familiar">Familiar</option>
+                          </select>
+                        </div>
+                        {/* Municipio/Estado */}
+                        <div className="col-span-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Municipio/Estado <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={domicilio.municipioEstado}
+                            onChange={e => setDomicilio(d => ({ ...d, municipioEstado: e.target.value }))}
+                            required
+                            placeholder="Ej. CDMX"
+                          />
+                        </div>
+                        {/* Tiempo de Residencia */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Tiempo de Residencia <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={domicilio.tiempoResidencia}
+                            onChange={e => setDomicilio(d => ({ ...d, tiempoResidencia: e.target.value }))}
+                            required
+                            placeholder="Ej. 5 años"
+                          />
+                        </div>
+                        {/* Monto Mensual */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Monto Mensual Renta/Crédito <span className="text-red-500">*</span></label>
                           <input
                             type="number"
-                            placeholder="$0.00"
                             className={inputBase}
+                            value={domicilio.montoMensual}
+                            onChange={e => setDomicilio(d => ({ ...d, montoMensual: e.target.value }))}
+                            required
+                            placeholder="Ej. 3500"
+                          />
+                        </div>
+                        {/* Teléfono Fijo */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Teléfono Fijo</label>
+                          <input
+                            type="tel"
+                            className={inputBase}
+                            value={domicilio.telFijo}
+                            onChange={e => setDomicilio(d => ({ ...d, telFijo: e.target.value }))}
+                            placeholder="Ej. 555-000-0000"
+                          />
+                        </div>
+                        {/* Teléfono Celular */}
+                        <div className="col-span-2">
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Teléfono Celular <span className="text-red-500">*</span></label>
+                          <input
+                            type="tel"
+                            className={inputBase}
+                            value={domicilio.telCelular}
+                            onChange={e => setDomicilio(d => ({ ...d, telCelular: e.target.value }))}
+                            required
+                            placeholder="Ej. 5512345678"
                           />
                         </div>
                       </div>
                     </motion.div>
 
-                    {/* Detalles de Crédito */}
+                    {/* Ocupación */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.4 }}
-                      className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 rounded-2xl p-6 border border-purple-200/30"
+                      transition={{ duration: 0.4, delay: 0.3 }}
+                      className="bg-gradient-to-br from-indigo-50/60 to-purple-50/80 rounded-2xl p-8 border border-indigo-200/30 shadow-lg mb-10"
                     >
-                      <h3 className="text-lg font-bold text-purple-700 mb-6 flex items-center gap-2">
-                        <span className="text-xl">💰</span> Detalles del Crédito
+                      {/* Anuncio de advertencia */}
+                      <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-100 via-yellow-50 to-yellow-100 border border-red-300 flex items-center gap-3">
+                        <span className="text-red-600 text-2xl">⚠️</span>
+                        <span className="font-semibold text-red-700 text-base">
+                          En caso de no especificar ocupación, el crédito será <span className="underline">CANCELADO</span>.
+                        </span>
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 mb-8 flex items-center gap-3">
+                        <span className="text-2xl">💼</span>
+                        Ocupación del Solicitante
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Actividad que realiza */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Monto Solicitado<span className="text-red-500 ml-1">*</span>
-                          </label>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Actividad que realiza <span className="text-red-500">*</span></label>
                           <input
-                            type="number"
-                            placeholder="$0.00"
+                            type="text"
                             className={inputBase}
+                            value={ocupacion.actividad}
+                            onChange={e => setOcupacion(o => ({ ...o, actividad: e.target.value }))}
+                            required
+                            placeholder="Ej. Comerciante, Empleado, etc."
                           />
                         </div>
+                        {/* Nombre de la empresa */}
                         <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Plazo (meses)<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <select className={inputBase}>
-                            <option value="">Seleccione...</option>
-                            <option value="6">6 meses</option>
-                            <option value="12">12 meses</option>
-                            <option value="18">18 meses</option>
-                            <option value="24">24 meses</option>
-                          </select>
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-semibold text-slate-700 mb-2">
-                            Propósito del Crédito<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <textarea
-                            rows={4}
-                            placeholder="Describa para qué utilizará el crédito..."
-                            className={`${inputBase} resize-none`}
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Nombre de la Empresa</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={ocupacion.empresa}
+                            onChange={e => setOcupacion(o => ({ ...o, empresa: e.target.value }))}
+                            placeholder="Ej. Tienda ABC"
                           />
                         </div>
+                        {/* Domicilio secundario - Calle y Número */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Domicilio Secundario (Negocio o Trabajo) - Calle y Número</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={ocupacion.domSecundarioCalle}
+                            onChange={e => setOcupacion(o => ({ ...o, domSecundarioCalle: e.target.value }))}
+                            placeholder="Ej. Insurgentes 456"
+                          />
+                        </div>
+                        {/* Domicilio secundario - Colonia */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Colonia</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={ocupacion.domSecundarioColonia}
+                            onChange={e => setOcupacion(o => ({ ...o, domSecundarioColonia: e.target.value }))}
+                            placeholder="Ej. Roma Norte"
+                          />
+                        </div>
+                        {/* Domicilio secundario - Municipio */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Municipio</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={ocupacion.domSecundarioMunicipio}
+                            onChange={e => setOcupacion(o => ({ ...o, domSecundarioMunicipio: e.target.value }))}
+                            placeholder="Ej. CDMX"
+                          />
+                        </div>
+                        {/* Teléfono */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Teléfono</label>
+                          <input
+                            type="tel"
+                            className={inputBase}
+                            value={ocupacion.telefono}
+                            onChange={e => setOcupacion(o => ({
+                              ...o,
+                              telefono: formatPhoneInput(e.target.value)
+                            }))}
+                            placeholder="Ej. 123-456-7890"
+                            maxLength={12}
+                            inputMode="numeric"
+                            pattern="\d{3}-\d{3}-\d{4}"
+                          />
+                        </div>
+                        {/* Antigüedad */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Antigüedad</label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={ocupacion.antiguedad}
+                            onChange={e => setOcupacion(o => ({ ...o, antiguedad: e.target.value }))}
+                            placeholder="Ej. 2 años"
+                          />
+                        </div>
+                        {/* Monto que Percibe */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">Monto que Percibe</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              className={inputBase + " w-36"}
+                              value={ocupacion.monto}
+                              onChange={e => setOcupacion(o => ({ ...o, monto: e.target.value }))}
+                              placeholder="Ej. 5000"
+                            />
+                            <select
+                              className={inputBase + " w-36"}
+                              value={ocupacion.periodo}
+                              onChange={e => setOcupacion(o => ({ ...o, periodo: e.target.value }))}
+                            >
+                              <option value="">Periodo...</option>
+                              <option value="Semanal">Semanal</option>
+                              <option value="Quincenal">Quincenal</option>
+                              <option value="Mensual">Mensual</option>
+                            </select>
+                          </div>
+                        </div>
+                        {/* Ingresos adicionales */}
+                        <div className="col-span-2 flex items-center mt-2">
+                          <input
+                            id="ingresosAdicionales"
+                            type="checkbox"
+                            className="mr-2 accent-indigo-600 w-5 h-5"
+                            checked={ocupacion.ingresosAdicionales}
+                            onChange={e => setOcupacion(o => ({ ...o, ingresosAdicionales: e.target.checked }))}
+                          />
+                          <label htmlFor="ingresosAdicionales" className="text-sm text-slate-700 font-medium select-none">
+                            ¿Cuenta con ingresos adicionales?
+                          </label>
+                        </div>
+                        {/* Si tiene ingresos adicionales, mostrar campos pequeños */}
+                        {ocupacion.ingresosAdicionales && (
+                          <div className="col-span-2 bg-indigo-50 border border-indigo-200/70 rounded-xl p-4 mt-2 flex flex-col gap-3 shadow-inner">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                              <div className="flex-1">
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">Concepto</label>
+                                <input
+                                  type="text"
+                                  className={inputBase + " text-xs"}
+                                  value={ocupacion.ingresoConcepto}
+                                  onChange={e => setOcupacion(o => ({ ...o, ingresoConcepto: e.target.value }))}
+                                  placeholder="Ej. Venta de postres"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">Monto</label>
+                                <input
+                                  type="number"
+                                  className={inputBase + " text-xs"}
+                                  value={ocupacion.ingresoMonto}
+                                  onChange={e => setOcupacion(o => ({ ...o, ingresoMonto: e.target.value }))}
+                                  placeholder="Ej. 1500"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-xs font-semibold text-slate-700 mb-1">Frecuencia</label>
+                                <input
+                                  type="text"
+                                  className={inputBase + " text-xs"}
+                                  value={ocupacion.ingresoFrecuencia}
+                                  onChange={e => setOcupacion(o => ({ ...o, ingresoFrecuencia: e.target.value }))}
+                                  placeholder="Ej. Mensual"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
 
