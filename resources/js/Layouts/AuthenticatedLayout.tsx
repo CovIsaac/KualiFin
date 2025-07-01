@@ -1,5 +1,6 @@
-import { PropsWithChildren, ReactNode, useState } from 'react';
+import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AuthenticatedLayoutProps extends PropsWithChildren {
   header?: ReactNode;
@@ -11,61 +12,170 @@ export default function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   const { auth } = usePage().props as any;
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   // padding dinámico en desktop según ancho del sidebar
-  const desktopPadding = sidebarOpen ? 'md:pl-56' : 'md:pl-16';
+  const desktopPadding = sidebarOpen ? 'md:pl-64' : 'md:pl-20';
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans text-slate-800 flex flex-col">
-      {/* Header general */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex items-center h-16 px-6 bg-white shadow">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
-          className="text-slate-800 focus:outline-none mr-4"
-        >
-          {sidebarOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          )}
-        </button>
-        <img src="/images/Logo.png" alt="Logo" className="h-10 w-auto object-contain" />
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans text-slate-800 flex flex-col relative overflow-hidden">
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
+      {/* Header general súper moderno */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center h-16 px-6 bg-white/80 backdrop-blur-xl shadow-xl border-b border-white/20"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/80 to-white/60"></div>
+        
+        <div className="relative z-10 flex items-center w-full">
+          <motion.button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative group mr-4 p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <AnimatePresence mode="wait">
+                {sidebarOpen ? (
+                  <motion.svg
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </motion.svg>
+                ) : (
+                  <motion.svg
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                  </motion.svg>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.button>
+          
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex items-center gap-3"
+          >
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+              <img 
+                src="/images/Logo.png" 
+                alt="Logo" 
+                className="relative h-10 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300" 
+              />
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="text-xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                KualiFin
+              </h1>
+              <p className="text-xs text-slate-500 font-medium">Sistema de Créditos</p>
+            </div>
+          </motion.div>
+
+          {/* User info en header */}
+          <div className="ml-auto flex items-center gap-4">
+            <div className="hidden md:block text-right">
+              <p className="text-sm font-semibold text-slate-700">{auth.user.name}</p>
+              <p className="text-xs text-slate-500">Bienvenido de vuelta</p>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+            >
+              {auth.user.name.charAt(0).toUpperCase()}
+            </motion.div>
+          </div>
+        </div>
+      </motion.header>
 
       {/* Si la página pasa un header, lo mostramos debajo del header general */}
       {header && (
-        <div className="fixed top-16 left-0 right-0 z-30 bg-white border-b border-slate-200 px-6 py-4">
-          {header}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="fixed top-16 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-white/20 px-6 py-4 shadow-lg"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-white/60 to-white/40"></div>
+          <div className="relative z-10">{header}</div>
+        </motion.div>
       )}
 
-      {/* Backdrop sólo en móvil */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* Backdrop súper moderno sólo en móvil */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      <div className={`flex flex-1 pt-${header ? '24' : '16'}`}>
-        {/* Sidebar */}
-        <aside
+      <div className={`flex flex-1 pt-${header ? '24' : '16'} relative z-10`}>
+        {/* Sidebar súper moderno */}
+        <motion.aside
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ 
+            x: 0, 
+            opacity: 1,
+            width: sidebarOpen ? (window.innerWidth >= 768 ? '16rem' : '16rem') : (window.innerWidth >= 768 ? '5rem' : '16rem')
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className={`
-            fixed top-${header ? '24' : '16'} bottom-0 left-0 z-40 bg-white shadow-md flex flex-col justify-between overflow-hidden
-            transition-transform duration-200 ease-out
-            ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
-            md:translate-x-0 md:transition-all md:duration-200 md:ease-out
-            ${sidebarOpen ? 'md:w-56' : 'md:w-16'}
+            fixed top-${header ? '24' : '16'} bottom-0 left-0 z-40 
+            bg-white/90 backdrop-blur-xl shadow-2xl border-r border-white/20
+            flex flex-col justify-between overflow-hidden
+            transition-transform duration-300 ease-out
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           `}
         >
-          <nav className="flex flex-col gap-2 px-2 mt-4">
+          {/* Efecto de gradiente en el sidebar */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/80 to-white/60"></div>
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-500/5 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-purple-500/5 to-transparent"></div>
+
+          <nav className="relative z-10 flex flex-col gap-2 px-3 mt-6">
             <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
             <NavLink href={route('solicitud')} icon="📋" text="Solicitud" collapsed={!sidebarOpen} />
             <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
@@ -74,34 +184,71 @@ export default function AuthenticatedLayout({
             <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
           </nav>
 
-          {sidebarOpen && (
-            <div className="px-2 pb-4 border-t border-slate-200">
-              <div className="mt-4 text-sm text-slate-700">{auth.user.name}</div>
-              <Link
-                href={route('logout')}
-                method="post"
-                as="button"
-                className="mt-2 w-full text-left text-sm text-red-600 hover:underline"
+          {/* User section en sidebar */}
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="relative z-10 px-3 pb-6 border-t border-white/30 mt-4"
               >
-                Cerrar sesión
-              </Link>
-            </div>
-          )}
-        </aside>
+                <div className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-slate-50/80 to-white/80 backdrop-blur-sm border border-white/30 shadow-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                      {auth.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-700 truncate">{auth.user.name}</p>
+                      <p className="text-xs text-slate-500">Usuario activo</p>
+                    </div>
+                  </div>
+                  
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link
+                      href={route('logout')}
+                      method="post"
+                      as="button"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-200 group"
+                    >
+                      <span className="text-base group-hover:scale-110 transition-transform duration-200">🚪</span>
+                      <span>Cerrar sesión</span>
+                    </Link>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.aside>
 
         {/* Contenido principal */}
-        <main
+        <motion.main
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           className={`
-            flex-1 bg-gray-100 min-h-screen
-            transition-all duration-200 ease-out
+            flex-1 min-h-screen relative
+            transition-all duration-300 ease-out
             pl-0 ${desktopPadding} pr-4
             ${header ? 'pt-16' : 'pt-0'}
           `}
           tabIndex={-1}
         >
           {children}
-        </main>
+        </motion.main>
       </div>
+
+      {/* Estilos CSS adicionales */}
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -119,20 +266,70 @@ function NavLink({
 }) {
   const { url } = usePage();
   const isActive = url === href;
-  const base = `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition duration-150 ${
-    isActive
-      ? 'bg-slate-200 text-blue-700 font-semibold border-l-4 border-blue-600 shadow-md'
-      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-  }`;
-  return isActive ? (
-    <span className={base} aria-current="page">
-      <span className="flex items-center justify-center w-10 h-10 text-lg">{icon}</span>
-      {!collapsed && <span className="whitespace-nowrap">{text}</span>}
-    </span>
-  ) : (
-    <Link href={href} className={base}>
-      <span className="flex items-center justify-center w-10 h-10 text-lg">{icon}</span>
-      {!collapsed && <span className="whitespace-nowrap">{text}</span>}
-    </Link>
+  
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="relative"
+    >
+      {isActive ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative group"
+        >
+          {/* Efecto de brillo para el activo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+          
+          <span 
+            className="relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-xl border-l-4 border-white/30"
+            aria-current="page"
+          >
+            <span className="flex items-center justify-center w-10 h-10 text-lg bg-white/20 rounded-xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+              {icon}
+            </span>
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="whitespace-nowrap font-bold"
+                >
+                  {text}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
+        </motion.div>
+      ) : (
+        <Link 
+          href={href} 
+          className="relative group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-300 text-slate-700 hover:text-slate-900 hover:bg-gradient-to-r hover:from-slate-100/80 hover:to-white/80 hover:shadow-lg backdrop-blur-sm border border-transparent hover:border-white/30"
+        >
+          {/* Efecto de brillo en hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 rounded-2xl"></div>
+          
+          <span className="relative flex items-center justify-center w-10 h-10 text-lg bg-slate-100/50 rounded-xl group-hover:bg-white/80 group-hover:scale-110 transition-all duration-300 shadow-sm group-hover:shadow-md">
+            {icon}
+          </span>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="relative whitespace-nowrap font-semibold"
+              >
+                {text}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
+      )}
+    </motion.div>
   );
 }
