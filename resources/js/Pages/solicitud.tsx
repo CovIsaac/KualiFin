@@ -60,6 +60,18 @@ export default function Solicitud() {
     ingresoFrecuencia: '',
   });
 
+  const [infoFamiliar, setInfoFamiliar] = useState({
+    nombreConyugue: '',
+    viveConUsted: false,
+    celularConyugue: '',
+    numeroHijos: '',
+    actividadConyugue: '',
+    ingresosSemanales: '',
+    domicilioTrabajo: '',
+    personasEnDomicilio: '',
+    dependientesEconomicos: ''
+  });
+
   function formatPhoneInput(value: string) {
     let digits = value.replace(/\D/g, '').slice(0, 10);
     if (digits.length > 6)
@@ -841,46 +853,181 @@ export default function Solicitud() {
                       </div>
                     </motion.div>
 
-                    {/* Referencias */}
+                    {/* Información Familiar */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.6 }}
-                      className="bg-gradient-to-br from-green-50/50 to-emerald-50/50 rounded-2xl p-6 border border-green-200/30"
+                      transition={{ duration: 0.4, delay: 0.4 }}
+                      className="bg-gradient-to-br from-rose-50/60 to-pink-50/80 rounded-2xl p-8 border border-rose-200/30 shadow-lg mb-10"
                     >
-                      <h3 className="text-lg font-bold text-green-700 mb-6 flex items-center gap-2">
-                        <span className="text-xl">👥</span> Referencias Personales
+                      <h3 className="text-xl sm:text-2xl font-bold text-rose-700 mb-8 flex items-center gap-3">
+                        <span className="text-2xl">👨‍👩‍👧‍👦</span>
+                        Información Familiar
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-slate-700">Referencia 1</h4>
-                          <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              Nombre Completo<span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input type="text" placeholder="Nombre de la referencia" className={inputBase} />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              Teléfono<span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input type="tel" placeholder="(555) 123-4567" className={inputBase} />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Nombre del Cónyuge */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Nombre Completo del Cónyuge
+                          </label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={infoFamiliar.nombreConyugue}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              nombreConyugue: e.target.value
+                            }))}
+                            placeholder="Ej. María González Pérez"
+                          />
+                        </div>
+
+                        {/* Vive con usted */}
+                        <div className="flex items-center">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={infoFamiliar.viveConUsted}
+                              onChange={e => setInfoFamiliar(prev => ({
+                                ...prev,
+                                viveConUsted: e.target.checked
+                              }))}
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                            <span className="ms-3 text-sm font-medium text-slate-700">
+                              ¿Vive con usted?
+                            </span>
+                          </label>
+                        </div>
+
+                        {/* Celular del Cónyuge */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Número Celular del Cónyuge
+                          </label>
+                          <input
+                            type="tel"
+                            className={inputBase}
+                            value={infoFamiliar.celularConyugue}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              celularConyugue: formatPhoneInput(e.target.value)
+                            }))}
+                            placeholder="Ej. 555-123-4567"
+                            maxLength={12}
+                          />
+                        </div>
+
+                        {/* Número de Hijos */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Número de Hijos
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            className={inputBase}
+                            value={infoFamiliar.numeroHijos}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              numeroHijos: e.target.value
+                            }))}
+                            placeholder="Ej. 2"
+                          />
+                        </div>
+
+                        {/* Actividad que realiza el Cónyuge */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Actividad que realiza el Cónyuge
+                          </label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={infoFamiliar.actividadConyugue}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              actividadConyugue: e.target.value
+                            }))}
+                            placeholder="Ej. Maestra, Comerciante"
+                          />
+                        </div>
+
+                        {/* Ingresos Semanales del Cónyuge */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Ingresos Semanales del Cónyuge
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">
+                              $
+                            </span>
+                            <input
+                              type="number"
+                              className={inputBase + " pl-7"}
+                              value={infoFamiliar.ingresosSemanales}
+                              onChange={e => setInfoFamiliar(prev => ({
+                                ...prev,
+                                ingresosSemanales: e.target.value
+                              }))}
+                              placeholder="Ej. 5000"
+                            />
                           </div>
                         </div>
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-slate-700">Referencia 2</h4>
-                          <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              Nombre Completo<span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input type="text" placeholder="Nombre de la referencia" className={inputBase} />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                              Teléfono<span className="text-red-500 ml-1">*</span>
-                            </label>
-                            <input type="tel" placeholder="(555) 123-4567" className={inputBase} />
-                          </div>
+
+                        {/* Domicilio de Trabajo del Cónyuge */}
+                        <div className="col-span-full">
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Domicilio de Trabajo del Cónyuge
+                          </label>
+                          <input
+                            type="text"
+                            className={inputBase}
+                            value={infoFamiliar.domicilioTrabajo}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              domicilioTrabajo: e.target.value
+                            }))}
+                            placeholder="Ej. Av. Principal #123, Col. Centro"
+                          />
+                        </div>
+
+                        {/* Número de Personas que viven en su domicilio */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Número de Personas que viven en su domicilio
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            className={inputBase}
+                            value={infoFamiliar.personasEnDomicilio}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              personasEnDomicilio: e.target.value
+                            }))}
+                            placeholder="Ej. 4"
+                          />
+                        </div>
+
+                        {/* Número de Dependientes Económicos */}
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1">
+                            Número de Dependientes Económicos
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            className={inputBase}
+                            value={infoFamiliar.dependientesEconomicos}
+                            onChange={e => setInfoFamiliar(prev => ({
+                              ...prev,
+                              dependientesEconomicos: e.target.value
+                            }))}
+                            placeholder="Ej. 3"
+                          />
                         </div>
                       </div>
                     </motion.div>
