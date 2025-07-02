@@ -43,6 +43,34 @@ export default function Solicitud() {
     telCelular: '',
   });
 
+  const [garantiaModalOpen, setGarantiaModalOpen] = useState(false);
+  const [garantiaActual, setGarantiaActual] = useState<number | null>(null);
+
+  const [garantias, setGarantias] = useState(Array(8).fill({
+    electrodomestico: '',
+    marca: '',
+    noSerie: '',
+    modelo: '',
+    antiguedad: '',
+    montoGarantizado: '',
+    foto: null
+  }));
+
+  const [avales, setAvales] = useState({
+    aval1: {
+      nombre: '',
+      direccion: '',
+      telefono: '',
+      parentesco: ''
+    },
+    aval2: {
+      nombre: '',
+      direccion: '',
+      telefono: '',
+      parentesco: ''
+    }
+  });
+
   const [ocupacion, setOcupacion] = useState({
     actividad: '',
     domSecundarioCalle: '',
@@ -802,15 +830,20 @@ export default function Solicitud() {
                         </div>
                         {/* Ingresos adicionales */}
                         <div className="col-span-2 flex items-center mt-2">
-                          <input
-                            id="ingresosAdicionales"
-                            type="checkbox"
-                            className="mr-2 accent-indigo-600 w-5 h-5"
-                            checked={ocupacion.ingresosAdicionales}
-                            onChange={e => setOcupacion(o => ({ ...o, ingresosAdicionales: e.target.checked }))}
-                          />
-                          <label htmlFor="ingresosAdicionales" className="text-sm text-slate-700 font-medium select-none">
-                            ¿Cuenta con ingresos adicionales?
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={ocupacion.ingresosAdicionales}
+                              onChange={e => setOcupacion(o => ({
+                                ...o,
+                                ingresosAdicionales: e.target.checked
+                              }))}
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            <span className="ms-3 text-sm font-medium text-slate-700">
+                              ¿Cuenta con ingresos adicionales?
+                            </span>
                           </label>
                         </div>
                         {/* Si tiene ingresos adicionales, mostrar campos pequeños */}
@@ -1030,6 +1063,493 @@ export default function Solicitud() {
                           />
                         </div>
                       </div>
+                    </motion.div>
+
+                    {/* Avales */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.5 }}
+                      className="bg-gradient-to-br from-amber-50/60 to-orange-50/80 rounded-2xl p-8 border border-amber-200/30 shadow-lg mb-10"
+                    >
+                      <h3 className="text-xl sm:text-2xl font-bold text-amber-700 mb-4 flex items-center gap-3">
+                        <span className="text-2xl">🤝</span>
+                        Avales
+                      </h3>
+
+                      {/* Aviso importante */}
+                      <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-amber-100 via-yellow-50 to-yellow-100 border border-amber-300 flex items-center gap-3">
+                        <span className="text-amber-600 text-2xl">⚠️</span>
+                        <span className="font-semibold text-amber-700 text-base">
+                          Los avales deben vivir en diferente domicilio
+                        </span>
+                      </div>
+
+                      {/* Aval 1 */}
+                      <div className="mb-8">
+                        <h4 className="text-lg font-bold text-amber-600 mb-4 flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                            1
+                          </span>
+                          Primer Aval
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Nombre */}
+                          <div className="col-span-full">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Nombre Completo<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className={inputBase}
+                              placeholder="Ej. Juan Pérez García"
+                              required
+                            />
+                          </div>
+                          
+                          {/* Dirección */}
+                          <div className="col-span-full">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Dirección Completa<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className={inputBase}
+                              placeholder="Ej. Calle 123, Colonia Centro, Ciudad, CP 12345"
+                              required
+                            />
+                          </div>
+
+                          {/* Teléfono */}
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Teléfono<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              className={inputBase}
+                              placeholder="Ej. 555-123-4567"
+                              maxLength={12}
+                              required
+                            />
+                          </div>
+
+                          {/* Parentesco */}
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Parentesco<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <select
+                              className={inputBase}
+                              required
+                            >
+                              <option value="">Seleccione parentesco...</option>
+                              <option value="Familiar">Familiar</option>
+                              <option value="Amigo">Amigo</option>
+                              <option value="Compañero">Compañero de trabajo</option>
+                              <option value="Conocido">Conocido</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Separador */}
+                      <div className="w-full h-px bg-gradient-to-r from-transparent via-amber-200 to-transparent my-8"></div>
+
+                      {/* Aval 2 */}
+                      <div>
+                        <h4 className="text-lg font-bold text-amber-600 mb-4 flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold">
+                            2
+                          </span>
+                          Segundo Aval
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Nombre */}
+                          <div className="col-span-full">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Nombre Completo<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className={inputBase}
+                              placeholder="Ej. María Rodríguez López"
+                              required
+                            />
+                          </div>
+                          
+                          {/* Dirección */}
+                          <div className="col-span-full">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Dirección Completa<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className={inputBase}
+                              placeholder="Ej. Avenida 456, Colonia Reforma, Ciudad, CP 54321"
+                              required
+                            />
+                          </div>
+
+                          {/* Teléfono */}
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Teléfono<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <input
+                              type="tel"
+                              className={inputBase}
+                              placeholder="Ej. 555-123-4567"
+                              maxLength={12}
+                              required
+                            />
+                          </div>
+
+                          {/* Parentesco */}
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">
+                              Parentesco<span className="text-red-500 ml-1">*</span>
+                            </label>
+                            <select
+                              className={inputBase}
+                              required
+                            >
+                              <option value="">Seleccione parentesco...</option>
+                              <option value="Familiar">Familiar</option>
+                              <option value="Amigo">Amigo</option>
+                              <option value="Compañero">Compañero de trabajo</option>
+                              <option value="Conocido">Conocido</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Garantías */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.6 }}
+                      className="bg-gradient-to-br from-emerald-50/60 to-teal-50/80 rounded-2xl p-8 border border-emerald-200/30 shadow-lg mb-10"
+                    >
+                      <h3 className="text-xl sm:text-2xl font-bold text-emerald-700 mb-8 flex items-center gap-3">
+                        <span className="text-2xl">📱</span>
+                        Garantías
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {garantias.map((garantia, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.1 * index }}
+                            onClick={() => {
+                              setGarantiaActual(index);
+                              setGarantiaModalOpen(true);
+                            }}
+                            className="bg-white rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100 cursor-pointer hover:scale-105 group"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                                {index + 1}
+                              </span>
+                              {garantia.electrodomestico ? (
+                                <span className="text-emerald-600 text-xs px-2 py-1 bg-emerald-50 rounded-full">
+                                  Completado
+                                </span>
+                              ) : (
+                                <span className="text-amber-600 text-xs px-2 py-1 bg-amber-50 rounded-full">
+                                  Pendiente
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="font-semibold text-slate-700 mb-2">
+                              {garantia.electrodomestico || `Garantía ${index + 1}`}
+                            </h4>
+
+                            {garantia.electrodomestico ? (
+                              <div className="space-y-1 text-sm text-slate-500">
+                                <p>{garantia.marca} - {garantia.modelo}</p>
+                                <p className="text-emerald-600 font-medium">
+                                  ${Number(garantia.montoGarantizado).toLocaleString()}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-slate-400">
+                                Click para agregar detalles
+                              </p>
+                            )}
+
+                            {garantia.foto && (
+                              <div className="mt-2 h-20 w-full rounded-lg overflow-hidden">
+                                <img
+                                  src={URL.createObjectURL(garantia.foto)}
+                                  alt={`Garantía ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* Modal para editar garantía */}
+                      <AnimatePresence>
+                        {garantiaModalOpen && garantiaActual !== null && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                            onClick={() => setGarantiaModalOpen(false)}
+                          >
+                            <motion.div
+                              initial={{ scale: 0.95, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.95, opacity: 0 }}
+                              onClick={e => e.stopPropagation()}
+                              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                            >
+                              {/* Header del modal */}
+                              <div className="p-6 border-b border-slate-200">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="text-xl font-bold text-slate-700 flex items-center gap-2">
+                                    <span className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                                      {garantiaActual + 1}
+                                    </span>
+                                    Detalles de la Garantía
+                                  </h3>
+                                  <button
+                                    onClick={() => setGarantiaModalOpen(false)}
+                                    className="text-slate-400 hover:text-slate-500 transition-colors"
+                                  >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Contenido del modal */}
+                              <div className="p-6 space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                  {/* Electrodoméstico */}
+                                  <div className="col-span-full">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      Electrodoméstico
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={inputBase}
+                                      value={garantias[garantiaActual].electrodomestico}
+                                      onChange={e => {
+                                        const newGarantias = [...garantias];
+                                        newGarantias[garantiaActual] = {
+                                          ...newGarantias[garantiaActual],
+                                          electrodomestico: e.target.value
+                                        };
+                                        setGarantias(newGarantias);
+                                      }}
+                                      placeholder="Ej. Televisión"
+                                    />
+                                  </div>
+
+                                  {/* Marca */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      Marca
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={inputBase}
+                                      value={garantias[garantiaActual].marca}
+                                      onChange={e => {
+                                        const newGarantias = [...garantias];
+                                        newGarantias[garantiaActual] = {
+                                          ...newGarantias[garantiaActual],
+                                          marca: e.target.value
+                                        };
+                                        setGarantias(newGarantias);
+                                      }}
+                                      placeholder="Ej. Samsung"
+                                    />
+                                  </div>
+
+                                  {/* No. Serie */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      No. Serie
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={inputBase}
+                                      value={garantias[garantiaActual].noSerie}
+                                      onChange={e => {
+                                        const newGarantias = [...garantias];
+                                        newGarantias[garantiaActual] = {
+                                          ...newGarantias[garantiaActual],
+                                          noSerie: e.target.value
+                                        };
+                                        setGarantias(newGarantias);
+                                      }}
+                                      placeholder="Ej. XYZ123456"
+                                    />
+                                  </div>
+
+                                  {/* Modelo */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      Modelo
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={inputBase}
+                                      value={garantias[garantiaActual].modelo}
+                                      onChange={e => {
+                                        const newGarantias = [...garantias];
+                                        newGarantias[garantiaActual] = {
+                                          ...newGarantias[garantiaActual],
+                                          modelo: e.target.value
+                                        };
+                                        setGarantias(newGarantias);
+                                      }}
+                                      placeholder="Ej. UN55TU7000"
+                                    />
+                                  </div>
+
+                                  {/* Antigüedad */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      Antigüedad
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={inputBase}
+                                      value={garantias[garantiaActual].antiguedad}
+                                      onChange={e => {
+                                        const newGarantias = [...garantias];
+                                        newGarantias[garantiaActual] = {
+                                          ...newGarantias[garantiaActual],
+                                          antiguedad: e.target.value
+                                        };
+                                        setGarantias(newGarantias);
+                                      }}
+                                      placeholder="Ej. 2 años"
+                                    />
+                                  </div>
+
+                                  {/* Monto Garantizado */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                      Monto Garantizado
+                                    </label>
+                                    <div className="relative">
+                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">
+                                        $
+                                      </span>
+                                      <input
+                                        type="number"
+                                        className={inputBase + " pl-7"}
+                                        value={garantias[garantiaActual].montoGarantizado}
+                                        onChange={e => {
+                                          const newGarantias = [...garantias];
+                                          newGarantias[garantiaActual] = {
+                                            ...newGarantias[garantiaActual],
+                                            montoGarantizado: e.target.value
+                                          };
+                                          setGarantias(newGarantias);
+                                        }}
+                                        placeholder="Ej. 5000"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Subir Foto */}
+                                  <div className="col-span-full">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                      Fotografía
+                                    </label>
+                                    <div className="flex flex-col items-center gap-4">
+                                      {garantias[garantiaActual].foto ? (
+                                        <div className="relative w-full h-48 group">
+                                          <img
+                                            src={URL.createObjectURL(garantias[garantiaActual].foto)}
+                                            alt={`Garantía ${garantiaActual + 1}`}
+                                            className="w-full h-full object-cover rounded-lg"
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const newGarantias = [...garantias];
+                                              newGarantias[garantiaActual] = {
+                                                ...newGarantias[garantiaActual],
+                                                foto: null
+                                              };
+                                              setGarantias(newGarantias);
+                                            }}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                          >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <label className="w-full cursor-pointer">
+                                          <div className="w-full h-48 border-2 border-dashed border-emerald-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-emerald-500 transition-colors duration-300">
+                                            <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            <span className="text-sm text-slate-600">
+                                              Click para subir foto
+                                            </span>
+                                          </div>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={e => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                const newGarantias = [...garantias];
+                                                newGarantias[garantiaActual] = {
+                                                  ...newGarantias[garantiaActual],
+                                                  foto: file
+                                                };
+                                                setGarantias(newGarantias);
+                                              }
+                                            }}
+                                          />
+                                        </label>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Footer del modal */}
+                              <div className="p-6 border-t border-slate-200 flex justify-end gap-4">
+                                <button
+                                  type="button"
+                                  onClick={() => setGarantiaModalOpen(false)}
+                                  className="px-4 py-2 text-slate-600 hover:text-slate-700 transition-colors"
+                                >
+                                  Cerrar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setGarantiaModalOpen(false)}
+                                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                                >
+                                  Guardar
+                                </button>
+                              </div>
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
 
                     {/* Acciones */}
