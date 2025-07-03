@@ -101,7 +101,7 @@ export default function Login({
                   Bienvenido al sistema de créditos
                 </motion.p>
 
-                {/* Status message */}
+{/* Status message */}
                 <AnimatePresence>
                   {status && (
                     <motion.div
