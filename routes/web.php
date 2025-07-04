@@ -19,9 +19,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/solicitud', function () {
+Route::get('/nuevoCredito', function () {
     return Inertia::render('solicitud');
 })->name('solicitud');
+
+Route::get('/recreditoCliente', function () {
+    return Inertia::render('recreditoClientes');
+})->name('recreditoClientes');
 
 Route::get('/reportes', function () {
     return Inertia::render('reportes');
