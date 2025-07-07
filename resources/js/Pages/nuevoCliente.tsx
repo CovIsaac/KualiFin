@@ -69,6 +69,8 @@ export default function NuevoCliente() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedClient, setSelectedClient] = useState<typeof clientesExistentes[0] | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [clienteSaved, setClienteSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Cliente
   const [cliente, setCliente] = useState({ 
@@ -133,6 +135,27 @@ export default function NuevoCliente() {
     setCliente(c => ({ ...c, nombre: '' }));
     setShowSuggestions(false);
   }
+
+  // Función para manejar el envío del formulario
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Simular envío
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsSubmitting(false);
+    setClienteSaved(true);
+    
+    // Auto-reset después de 5 segundos
+    setTimeout(() => {
+      setClienteSaved(false);
+      setCliente({ nombre: '', edad: '', sexo: '', estado_civil: '', curp: '' });
+      setClienteFiles({ ine: null, curp: null, comprobante: null });
+      setSelectedClient(null);
+      setSearchQuery('');
+    }, 5000);
+  };
 
   // Formatear CURP en tiempo real
   function formatCURP(value: string) {
@@ -253,7 +276,64 @@ export default function NuevoCliente() {
             </div>
           </motion.div>
 
-          <form>
+          <AnimatePresence mode="wait">
+            {clienteSaved ? (
+              /* Mensaje de éxito súper moderno */
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
+                className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-green-500 to-emerald-600 p-12 text-white text-center shadow-2xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full animate-pulse"></div>
+                
+                <div className="relative z-10">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.2, type: "spring", bounce: 0.5 }}
+                    className="text-8xl mb-6"
+                  >
+                    🎉
+                  </motion.div>
+                  <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="text-4xl font-black mb-4"
+                  >
+                    ¡Cliente Registrado Exitosamente!
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    className="text-xl text-green-100 mb-6"
+                  >
+                    El cliente ha sido agregado al sistema correctamente con toda su información y documentos.
+                  </motion.p>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                    className="flex items-center justify-center gap-3 text-green-200"
+                  >
+                    <div className="w-6 h-6 border-2 border-green-200 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Redirigiendo automáticamente...</span>
+                  </motion.div>
+                </div>
+              </motion.div>
+            ) : (
+              /* Formulario súper moderno */
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+              >
+                <form onSubmit={handleSubmit}>
             <AnimatePresence mode='wait' initial={false}>
                 <motion.div
                   key="cliente"
@@ -600,7 +680,6 @@ export default function NuevoCliente() {
               
 
               
-            </AnimatePresence>
 
             {/* Navegación súper moderna */}
             <motion.div 
@@ -623,19 +702,41 @@ export default function NuevoCliente() {
                   </motion.button>
                                     
                   <motion.button
-                    type="button"
-                    onClick={() => alert('Cliente listo')}
-                    whileHover={{ scale: 1.05, boxShadow: "0 15px 30px rgba(59, 130, 246, 0.4)" }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
+                    type="submit"
+                    disabled={isSubmitting}
+                    whileHover={{ scale: isSubmitting ? 1 : 1.05, boxShadow: isSubmitting ? undefined : "0 15px 30px rgba(34, 197, 94, 0.4)" }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                    className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg flex items-center gap-3 ${
+                      isSubmitting
+                        ? 'bg-slate-400 text-slate-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700'
+                    }`}
                   >
-                    ✅ Guardar Cliente
+                    {isSubmitting ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5 border-2 border-slate-600 border-t-transparent rounded-full"
+                        />
+                        <span>Guardando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl">✅</span>
+                        <span>Guardar Cliente</span>
+                      </>
+                    )}
                   </motion.button>
 
                 </div>
               </div>
             </motion.div>
           </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+            </AnimatePresence>
         </div>
       </div>
 
