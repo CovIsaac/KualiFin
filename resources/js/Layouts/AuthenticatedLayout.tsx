@@ -177,10 +177,11 @@ export default function AuthenticatedLayout({
 
           <nav className="relative z-10 flex flex-col gap-2 px-3 mt-6">
             <NavLink href={route('dashboard')} icon="🏠" text="Dashboard" collapsed={!sidebarOpen} />
-            <NavLink href={route('solicitud')} icon="📋" text="Solicitud" collapsed={!sidebarOpen} />
-            <NavLink href={route('nuevoCliente')} icon="👥" text="Clientes" collapsed={!sidebarOpen} />
-            <NavLink href={route('panelRevision')} icon="🔍" text="Panel Revisión" collapsed={!sidebarOpen} />
+            <NavLink href={route('solicitud')} icon="📋" text="Nueva Solicitud" collapsed={!sidebarOpen} />
+            <NavLink href={route('nuevoCliente')} icon="👥" text="Nuevo Cliente" collapsed={!sidebarOpen} />
+            <NavLink href={route('panelRevision')} icon="🔍" text="Panel de Revisión" collapsed={!sidebarOpen} />
             <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
+            <NavLink href={route('recreditoClientes')} icon="🔄" text="Recrédito Clientes" collapsed={!sidebarOpen} />
             <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
           </nav>
 
