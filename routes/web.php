@@ -39,5 +39,12 @@ Route::get('/panelRevision', function () {
     return Inertia::render('PanelRevision');
 })->name('panelRevision');
 
+Route::get('/registrarEmpleado', function () {
+    return Inertia::render('register');
+})->name('register');
+
+Route::get('/panelAdministrativo', function () {
+    return Inertia::render('AdminDashboard');
+})->name('AdminDashboard');
 
 require __DIR__.'/auth.php';

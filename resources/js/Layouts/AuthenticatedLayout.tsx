@@ -182,7 +182,7 @@ export default function AuthenticatedLayout({
             <NavLink href={route('panelRevision')} icon="🔍" text="Panel de Revisión" collapsed={!sidebarOpen} />
             <NavLink href={route('reportes')} icon="📊" text="Reportes" collapsed={!sidebarOpen} />
             <NavLink href={route('recreditoClientes')} icon="🔄" text="Recrédito Clientes" collapsed={!sidebarOpen} />
-            <NavLink href="#" icon="⚙️" text="Configuración" collapsed={!sidebarOpen} />
+            <NavLink href={route('AdminDashboard')} icon="🧑‍💼" text="Panel Administrativo" collapsed={!sidebarOpen} />
           </nav>
 
           {/* User section en sidebar */}

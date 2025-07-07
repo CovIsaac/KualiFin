@@ -1741,14 +1741,6 @@ export default function Solicitud() {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Estilos CSS adicionales */}
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.8; }
-        }
-      `}</style>
     </AuthenticatedLayout>
   );
 }
