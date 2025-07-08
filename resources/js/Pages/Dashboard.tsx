@@ -1,40 +1,42 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
   const [animatedValues, setAnimatedValues] = useState([0, 0, 0, 0, 0]);
   const [isVisible, setIsVisible] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Actualizar la hora cada segundo
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const summaryCards = [
-    { title: 'Prospectados', value: 12, icon: '👥', gradient: 'from-blue-500 to-cyan-400', bgGradient: 'from-blue-50 to-cyan-50' },
-    { title: 'En revisión', value: 8, icon: '📋', gradient: 'from-amber-500 to-orange-400', bgGradient: 'from-amber-50 to-orange-50' },
-    { title: 'Aprobados', value: 5, icon: '✅', gradient: 'from-green-500 to-emerald-400', bgGradient: 'from-green-50 to-emerald-50' },
-    { title: 'Desembolsados', value: 3, icon: '💰', gradient: 'from-purple-500 to-violet-400', bgGradient: 'from-purple-50 to-violet-50' },
-    { title: 'Morosos', value: 1, icon: '⚠️', gradient: 'from-red-500 to-pink-400', bgGradient: 'from-red-50 to-pink-50' },
+    { title: 'Prospectados', value: 12, icon: '👥', color: 'blue', description: 'Nuevos clientes potenciales' },
+    { title: 'En revisión', value: 8, icon: '📋', color: 'amber', description: 'Solicitudes pendientes' },
+    { title: 'Aprobados', value: 5, icon: '✅', color: 'green', description: 'Créditos autorizados' },
+    { title: 'Desembolsados', value: 3, icon: '💰', color: 'purple', description: 'Fondos liberados' },
+    { title: 'Morosos', value: 1, icon: '⚠️', color: 'red', description: 'Requieren seguimiento' },
   ];
 
   const clientStatuses = [
-    { nombre: 'María López', monto: '$10,000', estado: 'Aprobado', progresoColor: 'bg-gradient-to-r from-green-400 to-emerald-500', porcentaje: 'w-3/4', avatar: '👩‍💼' },
-    { nombre: 'Carlos Ruiz', monto: '$5,000', estado: 'Supervisado', progresoColor: 'bg-gradient-to-r from-blue-400 to-cyan-500', porcentaje: 'w-1/2', avatar: '👨‍💼' },
-    { nombre: 'Lucía Torres', monto: '$8,000', estado: 'Prospectado', progresoColor: 'bg-gradient-to-r from-amber-400 to-orange-500', porcentaje: 'w-1/4', avatar: '👩‍🎓' },
-    { nombre: 'Pedro Sánchez', monto: '$12,000', estado: 'Desembolsado', progresoColor: 'bg-gradient-to-r from-purple-400 to-violet-500', porcentaje: 'w-full', avatar: '👨‍🔧' },
-    { nombre: 'Ana García', monto: '$7,500', estado: 'Moroso', progresoColor: 'bg-gradient-to-r from-red-400 to-pink-500', porcentaje: 'w-full', avatar: '👩‍🏫' },
-  ];
-
-  const chartLegend = [
-    { label: 'Prospectados (12)', color: 'bg-gradient-to-r from-blue-500 to-cyan-400', textColor: 'text-blue-600' },
-    { label: 'En supervisión (8)', color: 'bg-gradient-to-r from-amber-500 to-orange-400', textColor: 'text-amber-600' },
-    { label: 'Aprobados (5)', color: 'bg-gradient-to-r from-green-500 to-emerald-400', textColor: 'text-green-600' },
-    { label: 'Desembolsados (3)', color: 'bg-gradient-to-r from-purple-500 to-violet-400', textColor: 'text-purple-600' },
-    { label: 'Morosos (1)', color: 'bg-gradient-to-r from-red-500 to-pink-400', textColor: 'text-red-600' },
+    { nombre: 'María López', monto: '$10,000', estado: 'Aprobado', progress: 75, avatar: '👩‍💼', color: 'green' },
+    { nombre: 'Carlos Ruiz', monto: '$5,000', estado: 'Supervisado', progress: 50, avatar: '👨‍💼', color: 'blue' },
+    { nombre: 'Lucía Torres', monto: '$8,000', estado: 'Prospectado', progress: 25, avatar: '👩‍🎓', color: 'amber' },
+    { nombre: 'Pedro Sánchez', monto: '$12,000', estado: 'Desembolsado', progress: 100, avatar: '👨‍🔧', color: 'purple' },
+    { nombre: 'Ana García', monto: '$7,500', estado: 'Moroso', progress: 100, avatar: '👩‍🏫', color: 'red' },
   ];
 
   const latestRequests = [
-    ['María López', '$10,000', 'Aprobado', '2025-06-17', '✅'],
-    ['Carlos Ruiz', '$5,000', 'En revisión', '2025-06-16', '📋'],
-    ['Lucía Torres', '$8,000', 'Prospectado', '2025-06-15', '👥'],
-    ['Pedro Sánchez', '$12,000', 'Desembolsado', '2025-06-14', '💰'],
+    ['María López', '$10,000', 'Aprobado', '2025-06-17', 'green'],
+    ['Carlos Ruiz', '$5,000', 'En revisión', '2025-06-16', 'amber'],
+    ['Lucía Torres', '$8,000', 'Prospectado', '2025-06-15', 'blue'],
+    ['Pedro Sánchez', '$12,000', 'Desembolsado', '2025-06-14', 'purple'],
   ];
 
   // Animación de contadores
@@ -62,233 +64,317 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  const getColorClasses = (color: string) => {
+    const colors = {
+      blue: {
+        bg: 'from-blue-500/20 to-cyan-500/20',
+        border: 'border-blue-500/30',
+        text: 'text-blue-600',
+        glow: 'shadow-blue-500/20',
+        accent: 'bg-blue-500'
+      },
+      amber: {
+        bg: 'from-amber-500/20 to-orange-500/20',
+        border: 'border-amber-500/30',
+        text: 'text-amber-600',
+        glow: 'shadow-amber-500/20',
+        accent: 'bg-amber-500'
+      },
+      green: {
+        bg: 'from-green-500/20 to-emerald-500/20',
+        border: 'border-green-500/30',
+        text: 'text-green-600',
+        glow: 'shadow-green-500/20',
+        accent: 'bg-green-500'
+      },
+      purple: {
+        bg: 'from-purple-500/20 to-violet-500/20',
+        border: 'border-purple-500/30',
+        text: 'text-purple-600',
+        glow: 'shadow-purple-500/20',
+        accent: 'bg-purple-500'
+      },
+      red: {
+        bg: 'from-red-500/20 to-pink-500/20',
+        border: 'border-red-500/30',
+        text: 'text-red-600',
+        glow: 'shadow-red-500/20',
+        accent: 'bg-red-500'
+      }
+    };
+    return colors[color as keyof typeof colors] || colors.blue;
+  };
+
   return (
     <AuthenticatedLayout>
       <Head title="Dashboard - Sistema de Créditos" />
 
-      {/* Background con gradiente animado */}
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-        {/* Elementos decorativos de fondo */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      {/* Background con efecto Liquid Glass */}
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Fondo base con gradiente sutil */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50"></div>
+        
+        {/* Elementos flotantes de fondo estilo Apple */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              x: [0, -80, 0],
+              y: [0, 60, 0],
+              scale: [1, 0.9, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 5
+            }}
+            className="absolute top-40 right-32 w-80 h-80 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              x: [0, 60, 0],
+              y: [0, -40, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 10
+            }}
+            className="absolute bottom-32 left-1/3 w-72 h-72 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-3xl"
+          />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header súper moderno */}
-          <div className={`mb-12 text-center transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <div className="relative inline-block">
-              <h1 className="text-4xl sm:text-6xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent mb-4 animate-pulse">
-                Dashboard
-              </h1>
-              <div className="absolute -top-2 -right-2 text-2xl animate-bounce">✨</div>
-            </div>
-            <p className="text-lg sm:text-xl text-slate-600 font-medium">
-              Visión general súper moderna del sistema de créditos 🚀
-            </p>
-          </div>
-
-          {/* Summary Cards con efectos súper modernos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-            {summaryCards.map(({ title, value, icon, gradient, bgGradient }, index) => (
-              <div
-                key={title}
-                className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${bgGradient} p-6 shadow-xl hover:shadow-2xl transform transition-all duration-500 hover:scale-105 hover:-rotate-1 ${
-                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                {/* Efecto de brillo */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                {/* Contenido */}
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`text-3xl p-3 rounded-xl bg-gradient-to-r ${gradient} text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                      {icon}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{title}</div>
-                      <div className={`text-3xl font-black bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
-                        {animatedValues[index]}
-                      </div>
-                    </div>
+          {/* Header con estilo Liquid Glass */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mb-12"
+          >
+            {/* Glass Card para el header */}
+            <div className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/5">
+              {/* Efecto de brillo sutil */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full animate-pulse" style={{ animationDuration: '3s' }}></div>
+              
+              <div className="relative z-10 p-8">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                  <div className="text-center lg:text-left">
+                    <motion.h1
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                      className="text-4xl lg:text-6xl font-black bg-gradient-to-r from-slate-800 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
+                    >
+                      Dashboard
+                    </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.4 }}
+                      className="text-lg text-slate-600 font-medium"
+                    >
+                      Visión general del sistema de créditos
+                    </motion.p>
                   </div>
                   
-                  {/* Barra de progreso decorativa */}
-                  <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full bg-gradient-to-r ${gradient} rounded-full transform transition-all duration-1000 delay-500`}
-                      style={{ width: isVisible ? `${(value / 12) * 100}%` : '0%' }}
-                    ></div>
-                  </div>
+                  {/* Reloj en tiempo real estilo Apple */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                    className="relative"
+                  >
+                    <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/30 shadow-xl">
+                      <div className="text-center">
+                        <div className="text-3xl font-black text-slate-800 mb-1">
+                          {currentTime.toLocaleTimeString('es-ES', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </div>
+                        <div className="text-sm text-slate-500 font-medium">
+                          {currentTime.toLocaleDateString('es-ES', { 
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Estado de Clientes con diseño súper moderno */}
-          <div className={`bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 mb-12 border border-white/20 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="text-4xl">👥</div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
-                Estado de clientes
-              </h2>
             </div>
-            
-            <div className="space-y-6">
-              {clientStatuses.map(({ nombre, monto, estado, progresoColor, porcentaje, avatar }, index) => (
-                <div 
-                  key={nombre} 
-                  className="group bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-[1.02] border border-slate-100"
+          </motion.div>
+
+          {/* Summary Cards con estilo Liquid Glass */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+            {summaryCards.map(({ title, value, icon, color, description }, index) => {
+              const colorClasses = getColorClasses(color);
+              return (
+                <motion.div
+                  key={title}
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.05, 
+                    y: -5,
+                    transition: { duration: 0.2 }
+                  }}
+                  className="group relative overflow-hidden"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="text-3xl bg-gradient-to-br from-slate-100 to-slate-200 rounded-full w-12 h-12 flex items-center justify-center shadow-md">
-                        {avatar}
+                  {/* Glass Card */}
+                  <div className={`relative rounded-2xl bg-white/40 backdrop-blur-xl border ${colorClasses.border} shadow-xl ${colorClasses.glow} p-6 h-full transition-all duration-300 group-hover:shadow-2xl`}>
+                    {/* Efecto de brillo en hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-r ${colorClasses.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}></div>
+                    
+                    {/* Contenido */}
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-4">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className={`w-12 h-12 ${colorClasses.accent} rounded-xl flex items-center justify-center text-white text-2xl shadow-lg`}
+                        >
+                          {icon}
+                        </motion.div>
+                        <div className="text-right">
+                          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{title}</div>
+                          <motion.div
+                            className={`text-3xl font-black ${colorClasses.text}`}
+                            key={animatedValues[index]}
+                            initial={{ scale: 1.2, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {animatedValues[index]}
+                          </motion.div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-slate-800 text-lg">{nombre}</div>
-                        <div className="text-slate-500 text-sm">{estado}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-black text-2xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                        {monto}
+                      
+                      <p className="text-xs text-slate-600 font-medium">{description}</p>
+                      
+                      {/* Barra de progreso sutil */}
+                      <div className="mt-3 w-full h-1 bg-slate-200/50 rounded-full overflow-hidden">
+                        <motion.div 
+                          className={`h-full ${colorClasses.accent} rounded-full`}
+                          initial={{ width: '0%' }}
+                          animate={{ width: `${(value / 12) * 100}%` }}
+                          transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                        />
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Barra de progreso súper moderna */}
-                  <div className="relative">
-                    <div className="w-full h-3 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full overflow-hidden shadow-inner">
-                      <div 
-                        className={`h-full ${progresoColor} ${porcentaje} rounded-full shadow-lg transform transition-all duration-1000 delay-${index * 200}`}
-                        style={{ 
-                          boxShadow: '0 0 20px rgba(0,0,0,0.2)',
-                          animation: `pulse 2s infinite ${index * 0.5}s`
-                        }}
-                      ></div>
-                    </div>
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/30 via-transparent to-transparent rounded-full"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                </motion.div>
+              );
+            })}
           </div>
 
-          {/* Chart + Leyenda súper moderno */}
-          <div className={`bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 mb-12 border border-white/20 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="text-4xl">📊</div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
-                Estado de los créditos
-              </h2>
-            </div>
+          {/* Estado de Clientes con Liquid Glass */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/5 p-8 mb-12 group"
+          >
+            {/* Efecto de brillo sutil */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-2000"></div>
             
-            <div className="flex flex-col lg:flex-row items-center gap-12">
-              {/* Chart con efectos modernos */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-                <div className="relative w-80 h-80">
-                  <svg viewBox="0 0 200 200" className="w-full h-full transform group-hover:scale-105 transition-transform duration-500">
-                    {/* Círculo base con gradiente */}
-                    <defs>
-                      <linearGradient id="baseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#e2e8f0" />
-                        <stop offset="100%" stopColor="#cbd5e1" />
-                      </linearGradient>
-                      <filter id="glow">
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                        <feMerge> 
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#baseGradient)" strokeWidth="20" />
-                    
-                    {/* Segmentos con gradientes y efectos */}
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#blue-gradient)" strokeWidth="20"
-                      strokeDasharray="208 502" strokeDashoffset="0" transform="rotate(-90 100 100)" 
-                      filter="url(#glow)" className="animate-pulse" />
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#amber-gradient)" strokeWidth="20"
-                      strokeDasharray="139 502" strokeDashoffset="-208" transform="rotate(-90 100 100)" 
-                      filter="url(#glow)" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#green-gradient)" strokeWidth="20"
-                      strokeDasharray="87 502" strokeDashoffset="-347" transform="rotate(-90 100 100)" 
-                      filter="url(#glow)" className="animate-pulse" style={{ animationDelay: '1s' }} />
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#purple-gradient)" strokeWidth="20"
-                      strokeDasharray="52 502" strokeDashoffset="-434" transform="rotate(-90 100 100)" 
-                      filter="url(#glow)" className="animate-pulse" style={{ animationDelay: '1.5s' }} />
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#red-gradient)" strokeWidth="20"
-                      strokeDasharray="17 502" strokeDashoffset="-486" transform="rotate(-90 100 100)" 
-                      filter="url(#glow)" className="animate-pulse" style={{ animationDelay: '2s' }} />
-                    
-                    {/* Gradientes para los segmentos */}
-                    <defs>
-                      <linearGradient id="blue-gradient">
-                        <stop offset="0%" stopColor="#3b82f6" />
-                        <stop offset="100%" stopColor="#06b6d4" />
-                      </linearGradient>
-                      <linearGradient id="amber-gradient">
-                        <stop offset="0%" stopColor="#f59e0b" />
-                        <stop offset="100%" stopColor="#f97316" />
-                      </linearGradient>
-                      <linearGradient id="green-gradient">
-                        <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#34d399" />
-                      </linearGradient>
-                      <linearGradient id="purple-gradient">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#a78bfa" />
-                      </linearGradient>
-                      <linearGradient id="red-gradient">
-                        <stop offset="0%" stopColor="#ef4444" />
-                        <stop offset="100%" stopColor="#f472b6" />
-                      </linearGradient>
-                    </defs>
-                    
-                    {/* Texto central con efectos */}
-                    <text x="100" y="90" textAnchor="middle" fontSize="32" fontWeight="bold" fill="url(#text-gradient)" className="animate-pulse">29</text>
-                    <text x="100" y="115" textAnchor="middle" fontSize="16" fill="#64748b">Total</text>
-                    
-                    <defs>
-                      <linearGradient id="text-gradient">
-                        <stop offset="0%" stopColor="#1e293b" />
-                        <stop offset="100%" stopColor="#475569" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg">
+                  👥
                 </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-600 bg-clip-text text-transparent">
+                  Estado de clientes
+                </h2>
               </div>
               
-              {/* Leyenda súper moderna */}
-              <div className="grid grid-cols-1 gap-4 flex-1">
-                {chartLegend.map(({ label, color, textColor }, index) => (
-                  <div 
-                    key={label} 
-                    className={`group flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white to-slate-50 shadow-md hover:shadow-lg transform transition-all duration-300 hover:scale-105 border border-slate-100`}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className={`w-6 h-6 rounded-full ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}></div>
-                    <span className={`font-semibold ${textColor} group-hover:scale-105 transition-transform duration-300`}>
-                      {label}
-                    </span>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {clientStatuses.map(({ nombre, monto, estado, progress, avatar, color }, index) => {
+                  const colorClasses = getColorClasses(color);
+                  return (
+                    <motion.div
+                      key={nombre}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+                      whileHover={{ scale: 1.02, x: 10 }}
+                      className="group relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-xl border border-white/30 p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      {/* Efecto de color en hover */}
+                      <div className={`absolute inset-0 bg-gradient-to-r ${colorClasses.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}></div>
+                      
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            className="text-3xl bg-white/80 rounded-full w-12 h-12 flex items-center justify-center shadow-md backdrop-blur-sm"
+                          >
+                            {avatar}
+                          </motion.div>
+                          <div>
+                            <div className="font-bold text-slate-800 text-lg">{nombre}</div>
+                            <div className={`text-sm font-medium ${colorClasses.text}`}>{estado}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-black text-2xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                            {monto}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Barra de progreso moderna */}
+                      <div className="mt-4 relative">
+                        <div className="w-full h-2 bg-white/50 rounded-full overflow-hidden backdrop-blur-sm">
+                          <motion.div 
+                            className={`h-full ${colorClasses.accent} rounded-full shadow-sm`}
+                            initial={{ width: '0%' }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 1, delay: 1 + index * 0.2 }}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Tabla súper moderna */}
-          <div className={`bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-            <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-8 py-6 border-b border-slate-200">
+          {/* Tabla con Liquid Glass */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/5 group"
+          >
+            {/* Header de la tabla */}
+            <div className="bg-white/60 backdrop-blur-xl px-8 py-6 border-b border-white/20">
               <div className="flex items-center gap-4">
-                <div className="text-4xl">📋</div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg">
+                  📋
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-purple-600 bg-clip-text text-transparent">
                   Últimas solicitudes
                 </h3>
               </div>
@@ -296,7 +382,7 @@ export default function Dashboard() {
             
             <div className="overflow-x-auto">
               <table className="min-w-full">
-                <thead className="bg-gradient-to-r from-slate-100 to-slate-200">
+                <thead className="bg-white/30 backdrop-blur-sm">
                   <tr>
                     {['Cliente', 'Monto', 'Estado', 'Fecha'].map((header) => (
                       <th
@@ -308,47 +394,45 @@ export default function Dashboard() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {latestRequests.map(([cliente, monto, estado, fecha, icon], index) => (
-                    <tr 
-                      key={cliente} 
-                      className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300"
-                    >
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl">{icon}</div>
-                          <span className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors duration-300">
-                            {cliente}
+                <tbody className="divide-y divide-white/20">
+                  {latestRequests.map(([cliente, monto, estado, fecha, color], index) => {
+                    const colorClasses = getColorClasses(color);
+                    return (
+                      <motion.tr
+                        key={cliente}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 1.2 + index * 0.1 }}
+                        className="group hover:bg-white/30 transition-all duration-300 backdrop-blur-sm"
+                      >
+                        <td className="px-8 py-6">
+                          <div className="flex items-center gap-3">
+                            <div className="text-2xl">👤</div>
+                            <span className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors duration-300">
+                              {cliente}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className="font-bold text-lg bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                            {monto}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="font-bold text-lg bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                          {monto}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
-                          {estado}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 text-slate-600 font-medium">{fecha}</td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-white/60 backdrop-blur-sm border ${colorClasses.border} ${colorClasses.text} shadow-sm`}>
+                            {estado}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 text-slate-600 font-medium">{fecha}</td>
+                      </motion.tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
-
-      {/* Estilos CSS adicionales */}
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.8; }
-        }
-      `}</style>
     </AuthenticatedLayout>
   );
 }
