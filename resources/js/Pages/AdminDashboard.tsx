@@ -169,48 +169,6 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Estadísticas rápidas súper modernas */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {adminStats.map(({ title, value, icon, gradient, bgGradient, description }, index) => (
-                    <motion.div
-                      key={title}
-                      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                      whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
-                      className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${bgGradient} p-6 shadow-xl hover:shadow-2xl transform transition-all duration-500 border border-white/20`}
-                    >
-                      {/* Efecto de brillo */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                      
-                      {/* Contenido */}
-                      <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className={`text-3xl p-3 rounded-xl bg-gradient-to-r ${gradient} text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                            {icon}
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{title}</div>
-                            <div className={`text-3xl font-black bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
-                              {animatedValues[index]}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <p className="text-xs text-slate-600 font-medium">{description}</p>
-                        
-                        {/* Barra de progreso decorativa */}
-                        <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden mt-3">
-                          <motion.div 
-                            className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
-                            initial={{ width: '0%' }}
-                            animate={{ width: isVisible ? `${Math.min((value / Math.max(...adminStats.map(s => s.value))) * 100, 100)}%` : '0%' }}
-                            transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
               </div>
             </div>
           </motion.div>
