@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, CloudArrowUpIcon, ExclamationTriangleIcon, UserIcon } from '@heroicons/react/24/outline';
@@ -84,6 +84,18 @@ export default function NuevoCliente() {
     comprobante: null,
   });
 
+  const { data, setData, post } = useForm({
+    nombre: '',
+    apellido_p: '',
+    apellido_m: '',
+    curp: '',
+    fecha_nac: '',
+    sexo: '',
+    activo: true,
+  });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   // Filtrar clientes basado en la búsqueda
   const filteredClients = clientesExistentes.filter(client =>
@@ -98,7 +110,12 @@ export default function NuevoCliente() {
     target: 'cliente'
   ) {
     const { name, value } = e.target;
-    if (target === 'cliente') setCliente(c => ({ ...c, [name]: value }));
+    if (target === 'cliente') {
+      setCliente(c => ({ ...c, [name]: value }));
+      if (['nombre', 'apellido_p', 'apellido_m', 'curp', 'fecha_nac', 'sexo', 'activo'].includes(name)) {
+        setData(name as keyof typeof data, value);
+      }
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -116,6 +133,7 @@ export default function NuevoCliente() {
     const value = e.target.value;
     setSearchQuery(value);
     setCliente(c => ({ ...c, nombre: value }));
+    setData('nombre', value);
     setShowSuggestions(value.length > 0);
     setSelectedClient(null);
   }
@@ -123,6 +141,7 @@ export default function NuevoCliente() {
   function selectClient(client: typeof clientesExistentes[0]) {
     setSelectedClient(client);
     setCliente(c => ({ ...c, nombre: client.nombre }));
+    setData('nombre', client.nombre);
     setSearchQuery(client.nombre);
     setShowSuggestions(false);
   }
@@ -131,7 +150,21 @@ export default function NuevoCliente() {
     setSelectedClient(null);
     setSearchQuery('');
     setCliente(c => ({ ...c, nombre: '' }));
+    setData('nombre', '');
     setShowSuggestions(false);
+  }
+
+  function handleSubmit() {
+    post(route('clientes.store'), {
+      onSuccess: () => {
+        setSuccessMessage('Cliente registrado correctamente');
+        setErrorMessage('');
+      },
+      onError: () => {
+        setErrorMessage('Hubo un error al registrar el cliente');
+        setSuccessMessage('');
+      },
+    });
   }
 
   // Formatear CURP en tiempo real
@@ -454,10 +487,13 @@ export default function NuevoCliente() {
                           <select
                             id="sexo"
                             name="sexo"
-                            value={cliente.sexo}
-                            onChange={e => handleChange(e, 'cliente')}
-                            className={inputBase}
-                          >
+                          value={cliente.sexo}
+                          onChange={e => {
+                            handleChange(e, 'cliente');
+                            setData('sexo', e.target.value);
+                          }}
+                          className={inputBase}
+                        >
                             <option value="">Seleccione…</option>
                             <option value="masculino">Masculino</option>
                             <option value="femenino">Femenino</option>
@@ -489,11 +525,15 @@ export default function NuevoCliente() {
                           <input
                             id="curp"
                             name="curp"
-                            value={cliente.curp}
-                            onChange={e => setCliente(c => ({ ...c, curp: formatCURP(e.target.value) }))}
-                            placeholder="PELJ850315HDFRRN09"
-                            maxLength={18}
-                            className={inputBase}
+                          value={cliente.curp}
+                          onChange={e => {
+                            const formatted = formatCURP(e.target.value);
+                            setCliente(c => ({ ...c, curp: formatted }));
+                            setData('curp', formatted);
+                          }}
+                          placeholder="PELJ850315HDFRRN09"
+                          maxLength={18}
+                          className={inputBase}
                           />
                           <p className="text-xs text-slate-500 mt-1">
                             Formato: 18 caracteres (4 letras + 6 números + 8 caracteres)
@@ -624,13 +664,19 @@ export default function NuevoCliente() {
                                     
                   <motion.button
                     type="button"
-                    onClick={() => alert('Cliente listo')}
+                    onClick={handleSubmit}
                     whileHover={{ scale: 1.05, boxShadow: "0 15px 30px rgba(59, 130, 246, 0.4)" }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
                   >
                     ✅ Guardar Cliente
                   </motion.button>
+                  {successMessage && (
+                    <p className="text-green-600 font-semibold mt-4">{successMessage}</p>
+                  )}
+                  {errorMessage && (
+                    <p className="text-red-600 font-semibold mt-4">{errorMessage}</p>
+                  )}
 
                 </div>
               </div>
