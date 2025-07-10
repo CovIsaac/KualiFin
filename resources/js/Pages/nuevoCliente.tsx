@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, CloudArrowUpIcon, ExclamationTriangleIcon, UserIcon } from '@heroicons/react/24/outline';
@@ -71,34 +71,18 @@ export default function NuevoCliente() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Cliente
-  const [cliente, setCliente] = useState({
-    nombre: '',
-    apellido_p: '',
-    apellido_m: '',
-    fecha_nac: '',
-    edad: '',
-    sexo: '',
-    estado_civil: '',
-    curp: '',
-    activo: true
+  const [cliente, setCliente] = useState({ 
+    nombre: '', 
+    edad: '', 
+    sexo: '', 
+    estado_civil: '', 
+    curp: '' 
   });
   const [clienteFiles, setClienteFiles] = useState<{ ine: File | null; curp: File | null; comprobante: File | null }>({
     ine: null,
     curp: null,
     comprobante: null,
   });
-
-  const { data, setData, post } = useForm({
-    nombre: '',
-    apellido_p: '',
-    apellido_m: '',
-    curp: '',
-    fecha_nac: '',
-    sexo: '',
-    activo: true,
-  });
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
 
 
   // Filtrar clientes basado en la búsqueda
@@ -113,16 +97,8 @@ export default function NuevoCliente() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     target: 'cliente'
   ) {
-    const { name } = e.target;
-    const value = (e.target as HTMLInputElement).type === 'checkbox'
-      ? (e.target as HTMLInputElement).checked
-      : e.target.value;
-    if (target === 'cliente') {
-      setCliente(c => ({ ...c, [name]: value }));
-      if (['nombre', 'apellido_p', 'apellido_m', 'curp', 'fecha_nac', 'sexo', 'activo'].includes(name)) {
-        setData(name as keyof typeof data, value);
-      }
-    }
+    const { name, value } = e.target;
+    if (target === 'cliente') setCliente(c => ({ ...c, [name]: value }));
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -140,7 +116,6 @@ export default function NuevoCliente() {
     const value = e.target.value;
     setSearchQuery(value);
     setCliente(c => ({ ...c, nombre: value }));
-    setData('nombre', value);
     setShowSuggestions(value.length > 0);
     setSelectedClient(null);
   }
@@ -148,7 +123,6 @@ export default function NuevoCliente() {
   function selectClient(client: typeof clientesExistentes[0]) {
     setSelectedClient(client);
     setCliente(c => ({ ...c, nombre: client.nombre }));
-    setData('nombre', client.nombre);
     setSearchQuery(client.nombre);
     setShowSuggestions(false);
   }
@@ -157,41 +131,7 @@ export default function NuevoCliente() {
     setSelectedClient(null);
     setSearchQuery('');
     setCliente(c => ({ ...c, nombre: '' }));
-    setData('nombre', '');
     setShowSuggestions(false);
-  }
-
-  function handleSubmit() {
-    if (
-      !data.nombre ||
-      !data.apellido_p ||
-      !data.apellido_m ||
-      !data.curp ||
-      !data.fecha_nac ||
-      !data.sexo
-    ) {
-      setErrorMessage('Todos los campos obligatorios deben llenarse');
-      setSuccessMessage('');
-      return;
-    }
-
-    const curpRegex = /^[A-Z]{4}\d{6}[A-Z0-9]{8}$/;
-    if (!curpRegex.test(data.curp)) {
-      setErrorMessage('La CURP no tiene un formato válido');
-      setSuccessMessage('');
-      return;
-    }
-
-    post(route('clientes.store'), {
-      onSuccess: () => {
-        setSuccessMessage('Cliente registrado correctamente');
-        setErrorMessage('');
-      },
-      onError: () => {
-        setErrorMessage('Hubo un error al registrar el cliente');
-        setSuccessMessage('');
-      },
-    });
   }
 
   // Formatear CURP en tiempo real
@@ -492,59 +432,6 @@ export default function NuevoCliente() {
                         </AnimatePresence>
 
                         <div>
-                          <label htmlFor="apellido_p" className="block text-sm font-semibold text-slate-700 mb-2">
-                            Apellido Paterno<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <input
-                            id="apellido_p"
-                            name="apellido_p"
-                            value={cliente.apellido_p}
-                            onChange={e => handleChange(e, 'cliente')}
-                            placeholder="García"
-                            className={inputBase}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="apellido_m" className="block text-sm font-semibold text-slate-700 mb-2">
-                            Apellido Materno<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <input
-                            id="apellido_m"
-                            name="apellido_m"
-                            value={cliente.apellido_m}
-                            onChange={e => handleChange(e, 'cliente')}
-                            placeholder="López"
-                            className={inputBase}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="fecha_nac" className="block text-sm font-semibold text-slate-700 mb-2">
-                            Fecha de Nacimiento<span className="text-red-500 ml-1">*</span>
-                          </label>
-                          <input
-                            id="fecha_nac"
-                            name="fecha_nac"
-                            type="date"
-                            value={cliente.fecha_nac}
-                            onChange={e => handleChange(e, 'cliente')}
-                            className={inputBase}
-                          />
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="checkbox"
-                            id="activo"
-                            name="activo"
-                            checked={cliente.activo}
-                            onChange={e => handleChange(e, 'cliente')}
-                            className="w-5 h-5 text-blue-600 border-2 border-blue-300 rounded focus:ring-blue-500"
-                          />
-                          <label htmlFor="activo" className="font-semibold text-slate-700">
-                            Activo
-                          </label>
-                        </div>
-
-                        <div>
                           <label htmlFor="edad" className="block text-sm font-semibold text-slate-700 mb-2">
                             Edad<span className="text-red-500 ml-1">*</span>
                           </label>
@@ -567,13 +454,10 @@ export default function NuevoCliente() {
                           <select
                             id="sexo"
                             name="sexo"
-                          value={cliente.sexo}
-                          onChange={e => {
-                            handleChange(e, 'cliente');
-                            setData('sexo', e.target.value);
-                          }}
-                          className={inputBase}
-                        >
+                            value={cliente.sexo}
+                            onChange={e => handleChange(e, 'cliente')}
+                            className={inputBase}
+                          >
                             <option value="">Seleccione…</option>
                             <option value="masculino">Masculino</option>
                             <option value="femenino">Femenino</option>
@@ -605,15 +489,11 @@ export default function NuevoCliente() {
                           <input
                             id="curp"
                             name="curp"
-                          value={cliente.curp}
-                          onChange={e => {
-                            const formatted = formatCURP(e.target.value);
-                            setCliente(c => ({ ...c, curp: formatted }));
-                            setData('curp', formatted);
-                          }}
-                          placeholder="PELJ850315HDFRRN09"
-                          maxLength={18}
-                          className={inputBase}
+                            value={cliente.curp}
+                            onChange={e => setCliente(c => ({ ...c, curp: formatCURP(e.target.value) }))}
+                            placeholder="PELJ850315HDFRRN09"
+                            maxLength={18}
+                            className={inputBase}
                           />
                           <p className="text-xs text-slate-500 mt-1">
                             Formato: 18 caracteres (4 letras + 6 números + 8 caracteres)
@@ -744,19 +624,13 @@ export default function NuevoCliente() {
                                     
                   <motion.button
                     type="button"
-                    onClick={handleSubmit}
+                    onClick={() => alert('Cliente listo')}
                     whileHover={{ scale: 1.05, boxShadow: "0 15px 30px rgba(59, 130, 246, 0.4)" }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
                   >
                     ✅ Guardar Cliente
                   </motion.button>
-                  {successMessage && (
-                    <p className="text-green-600 font-semibold mt-4">{successMessage}</p>
-                  )}
-                  {errorMessage && (
-                    <p className="text-red-600 font-semibold mt-4">{errorMessage}</p>
-                  )}
 
                 </div>
               </div>
