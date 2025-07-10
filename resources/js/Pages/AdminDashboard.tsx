@@ -269,42 +269,6 @@ export default function AdminDashboard() {
           </motion.div>
 
           {/* Información adicional súper moderna */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.5 }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 p-8 text-white text-center shadow-2xl"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full animate-pulse"></div>
-            
-            <div className="relative z-10">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.6, delay: 1.7, type: "spring", bounce: 0.5 }}
-                className="text-6xl mb-4"
-              >
-                🚀
-              </motion.div>
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.9 }}
-                className="text-2xl font-bold mb-2"
-              >
-                ¡Bienvenido al Panel Administrativo!
-              </motion.h3>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 2.1 }}
-                className="text-indigo-100 font-medium"
-              >
-                Desde aquí puedes gestionar todos los aspectos del sistema de créditos. 
-                Comienza registrando nuevos empleados o explora las opciones disponibles.
-              </motion.p>
-            </div>
-          </motion.div>
         </div>
       </div>
 
