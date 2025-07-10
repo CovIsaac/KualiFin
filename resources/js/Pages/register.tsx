@@ -70,7 +70,7 @@ export default function RegistrarEmpleado() {
     { value: 'promotor', label: 'Promotor', icon: '👩‍💼', color: 'from-blue-500 to-cyan-500' },
     { value: 'supervisor', label: 'Supervisor', icon: '👨‍💼', color: 'from-purple-500 to-violet-500' },
     { value: 'administrador', label: 'Administrador', icon: '🧑‍💻', color: 'from-orange-500 to-red-500' },
-    { value: 'gerente', label: 'Gerente', icon: '👔', color: 'from-green-500 to-emerald-500' },
+    { value: 'ejecutivo', label: 'Ejecutivo', icon: '👔', color: 'from-green-500 to-emerald-500' },
   ];
 
   return (
