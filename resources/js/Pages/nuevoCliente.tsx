@@ -71,12 +71,16 @@ export default function NuevoCliente() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Cliente
-  const [cliente, setCliente] = useState({ 
-    nombre: '', 
-    edad: '', 
-    sexo: '', 
-    estado_civil: '', 
-    curp: '' 
+  const [cliente, setCliente] = useState({
+    nombre: '',
+    apellido_p: '',
+    apellido_m: '',
+    fecha_nac: '',
+    edad: '',
+    sexo: '',
+    estado_civil: '',
+    curp: '',
+    activo: true
   });
   const [clienteFiles, setClienteFiles] = useState<{ ine: File | null; curp: File | null; comprobante: File | null }>({
     ine: null,
@@ -109,7 +113,10 @@ export default function NuevoCliente() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     target: 'cliente'
   ) {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value = (e.target as HTMLInputElement).type === 'checkbox'
+      ? (e.target as HTMLInputElement).checked
+      : e.target.value;
     if (target === 'cliente') {
       setCliente(c => ({ ...c, [name]: value }));
       if (['nombre', 'apellido_p', 'apellido_m', 'curp', 'fecha_nac', 'sexo', 'activo'].includes(name)) {
@@ -155,6 +162,26 @@ export default function NuevoCliente() {
   }
 
   function handleSubmit() {
+    if (
+      !data.nombre ||
+      !data.apellido_p ||
+      !data.apellido_m ||
+      !data.curp ||
+      !data.fecha_nac ||
+      !data.sexo
+    ) {
+      setErrorMessage('Todos los campos obligatorios deben llenarse');
+      setSuccessMessage('');
+      return;
+    }
+
+    const curpRegex = /^[A-Z]{4}\d{6}[A-Z0-9]{8}$/;
+    if (!curpRegex.test(data.curp)) {
+      setErrorMessage('La CURP no tiene un formato válido');
+      setSuccessMessage('');
+      return;
+    }
+
     post(route('clientes.store'), {
       onSuccess: () => {
         setSuccessMessage('Cliente registrado correctamente');
@@ -463,6 +490,59 @@ export default function NuevoCliente() {
                             </motion.div>
                           )}
                         </AnimatePresence>
+
+                        <div>
+                          <label htmlFor="apellido_p" className="block text-sm font-semibold text-slate-700 mb-2">
+                            Apellido Paterno<span className="text-red-500 ml-1">*</span>
+                          </label>
+                          <input
+                            id="apellido_p"
+                            name="apellido_p"
+                            value={cliente.apellido_p}
+                            onChange={e => handleChange(e, 'cliente')}
+                            placeholder="García"
+                            className={inputBase}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="apellido_m" className="block text-sm font-semibold text-slate-700 mb-2">
+                            Apellido Materno<span className="text-red-500 ml-1">*</span>
+                          </label>
+                          <input
+                            id="apellido_m"
+                            name="apellido_m"
+                            value={cliente.apellido_m}
+                            onChange={e => handleChange(e, 'cliente')}
+                            placeholder="López"
+                            className={inputBase}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="fecha_nac" className="block text-sm font-semibold text-slate-700 mb-2">
+                            Fecha de Nacimiento<span className="text-red-500 ml-1">*</span>
+                          </label>
+                          <input
+                            id="fecha_nac"
+                            name="fecha_nac"
+                            type="date"
+                            value={cliente.fecha_nac}
+                            onChange={e => handleChange(e, 'cliente')}
+                            className={inputBase}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            id="activo"
+                            name="activo"
+                            checked={cliente.activo}
+                            onChange={e => handleChange(e, 'cliente')}
+                            className="w-5 h-5 text-blue-600 border-2 border-blue-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor="activo" className="font-semibold text-slate-700">
+                            Activo
+                          </label>
+                        </div>
 
                         <div>
                           <label htmlFor="edad" className="block text-sm font-semibold text-slate-700 mb-2">
