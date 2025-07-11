@@ -10,11 +10,12 @@ class Cliente extends Model
     use HasFactory;
 
     protected $table = 'clientes';
-
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
 
+    const CREATED_AT = 'creado_en';
+    const UPDATED_AT = 'actualizado_en';
     public $timestamps = false;
 
     protected $fillable = [
