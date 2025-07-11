@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -18,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 });
 
 Route::get('/nuevoCredito', function () {
@@ -51,5 +53,8 @@ Route::post('/registrarEmpleado', [RegisteredUserController::class, 'store'])->n
 Route::get('/panelAdministrativo', function () {
     return Inertia::render('AdminDashboard');
 })->name('AdminDashboard');
+
+
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
 require __DIR__.'/auth.php';

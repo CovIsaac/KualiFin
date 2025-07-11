@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'rol', // Default role for the user
         'telefono', // User's phone number
+        'email_verified_at', 
     ];
 
     /**
