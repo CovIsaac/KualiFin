@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -39,9 +41,14 @@ Route::get('/panelRevision', function () {
     return Inertia::render('PanelRevision');
 })->name('panelRevision');
 
+// Ruta GET para mostrar formulario con Inertia
 Route::get('/registrarEmpleado', function () {
-    return Inertia::render('register');
-})->name('register');
+    return Inertia::render('Users/RegisterUserForm');
+})->name('register.form');
+
+// Ruta POST para procesar el formulario
+Route::post('/registrarEmpleado', [RegisteredUserController::class, 'store'])->name('register.user');
+
 
 Route::get('/panelAdministrativo', function () {
     return Inertia::render('AdminDashboard');
