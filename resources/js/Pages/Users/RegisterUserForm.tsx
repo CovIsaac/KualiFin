@@ -21,7 +21,7 @@ export default function RegistrarEmpleado() {
 
     if (data.password !== data.password_confirmation) return;
 
-    post('/registrarEmpleado', {
+    post(route('register.user'), {
       onStart: () => setSuccess(false),
       onSuccess: () => {
         setSuccess(true);
