@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -48,7 +47,6 @@ Route::get('/registrarEmpleado', function () {
 
 // Ruta POST para procesar el formulario
 Route::post('/registrarEmpleado', [RegisteredUserController::class, 'store'])->name('register.user');
-
 
 Route::get('/panelAdministrativo', function () {
     return Inertia::render('AdminDashboard');
