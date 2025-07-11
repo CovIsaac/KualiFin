@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('telefono', 20);
+            $table->string('telefono', 10);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('rol')->default('promotor');

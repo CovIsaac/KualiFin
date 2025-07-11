@@ -48,13 +48,13 @@ Route::get('/registrarEmpleado', function () {
 })->name('register.form');
 
 // Ruta POST para procesar el formulario
-Route::post('/registrarEmpleado', [RegisteredUserController::class, 'store'])->name('register.user');
+Route::post('/registrarEmpleado', [UserController::class, 'store'])->name('register.user');
 
 Route::get('/panelAdministrativo', function () {
     return Inertia::render('AdminDashboard');
 })->name('AdminDashboard');
 
 
-Route::post('/users', [UserController::class, 'store'])->name('users.store');
+// Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
 require __DIR__.'/auth.php';
