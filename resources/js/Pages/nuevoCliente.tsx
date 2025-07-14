@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Head } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircleIcon, CloudArrowUpIcon, ExclamationTriangleIcon, UserIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, CloudArrowUpIcon, ExclamationTriangleIcon, UserIcon, ClipboardIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 // Datos simulados de clientes existentes
 const clientesExistentes = [
@@ -68,6 +68,7 @@ export default function NuevoCliente() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedClient, setSelectedClient] = useState<typeof clientesExistentes[0] | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Cliente
@@ -137,6 +138,24 @@ export default function NuevoCliente() {
   // Formatear CURP en tiempo real
   function formatCURP(value: string) {
     return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 18);
+  }
+
+  // Función para copiar CURP al portapapeles
+  async function copyCURPToClipboard() {
+    if (!cliente.curp) return;
+    
+    try {
+      await navigator.clipboard.writeText(cliente.curp);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Error al copiar al portapapeles:', err);
+    }
+  }
+
+  // Función para abrir página de CURP
+  function openCURPPage() {
+    window.open('https://www.gob.mx/curp/', '_blank');
   }
 
   function getEstadoBadge(estado: string) {
@@ -486,15 +505,59 @@ export default function NuevoCliente() {
                           <label htmlFor="curp" className="block text-sm font-semibold text-slate-700 mb-2">
                             CURP<span className="text-red-500 ml-1">*</span>
                           </label>
-                          <input
-                            id="curp"
-                            name="curp"
-                            value={cliente.curp}
-                            onChange={e => setCliente(c => ({ ...c, curp: formatCURP(e.target.value) }))}
-                            placeholder="PELJ850315HDFRRN09"
-                            maxLength={18}
-                            className={inputBase}
-                          />
+                          <div className="flex gap-2">
+                            <input
+                              id="curp"
+                              name="curp"
+                              value={cliente.curp}
+                              onChange={e => setCliente(c => ({ ...c, curp: formatCURP(e.target.value) }))}
+                              placeholder="PELJ850315HDFRRN09"
+                              maxLength={18}
+                              className={inputBase}
+                            />
+                            
+                            {/* Botón para copiar CURP */}
+                            <motion.button
+                              type="button"
+                              onClick={copyCURPToClipboard}
+                              disabled={!cliente.curp}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+                                copySuccess 
+                                  ? 'bg-green-500 text-white' 
+                                  : cliente.curp 
+                                    ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl' 
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              }`}
+                              title="Copiar CURP al portapapeles"
+                            >
+                              {copySuccess ? (
+                                <>
+                                  <CheckCircleIcon className="w-5 h-5" />
+                                  ¡Copiado!
+                                </>
+                              ) : (
+                                <>
+                                  <ClipboardIcon className="w-5 h-5" />
+                                  Copiar
+                                </>
+                              )}
+                            </motion.button>
+
+                            {/* Botón para ir a página de CURP */}
+                            <motion.button
+                              type="button"
+                              onClick={openCURPPage}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="px-4 py-3 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl flex items-center gap-2"
+                              title="Ir a página oficial de CURP"
+                            >
+                              <GlobeAltIcon className="w-5 h-5" />
+                              CURP
+                            </motion.button>
+                          </div>
                           <p className="text-xs text-slate-500 mt-1">
                             Formato: 18 caracteres (4 letras + 6 números + 8 caracteres)
                           </p>
