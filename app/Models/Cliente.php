@@ -25,8 +25,11 @@ class Cliente extends Model
         'curp',
         'fecha_nac',
         'sexo',
+        'estado_civil',
         'creado_en',
         'actualizado_en',
         'activo',
     ];
+
+    public function documentos(){ return $this->hasMany(DocumentoCliente::class, 'cliente_id', 'id');}
 }

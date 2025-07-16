@@ -12,6 +12,7 @@ class DocumentoClienteController extends Controller
     {
         $validated = $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
+            'credito_id' => 'nullable|exists:creditos,id',
             'tipo_doc' => 'required|string|max:20',
             'url_s3' => 'required|string|max:255',
             'nombre_arch' => 'required|string|max:150',

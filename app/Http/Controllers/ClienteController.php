@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+use Faker\Factory as Faker;
 
 class ClienteController extends Controller
 {
@@ -16,17 +17,58 @@ class ClienteController extends Controller
     // Crear un nuevo cliente
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validación del cliente
+        $validatedCliente = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido_p' => 'required|string|max:100',
             'apellido_m' => 'required|string|max:100',
             'curp' => 'required|string|max:18|unique:clientes,curp',
             'fecha_nac' => 'required|date',
             'sexo' => 'required|string|max:10',
+            'estado_civil' => 'required|string|max:20',
             'activo' => 'required|boolean',
         ]);
-        $cliente = Cliente::create($validated);
-        return response()->json($cliente, 201);
+
+        // Validación de documentos (archivos)
+        $validatedDocs = $request->validate([
+            'documentos.ine' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentos.curp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentos.comprobante' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        // Crear cliente
+        $cliente = Cliente::create($validatedCliente);
+
+        // Descomenta para usar documentos reales subidos
+        /*
+        foreach (['ine', 'curp', 'comprobante'] as $tipo) {
+            if ($request->hasFile("documentos.$tipo")) {
+                $file = $request->file("documentos.$tipo");
+                $path = $file->store('clientes_docs'); // O almacenamiento S3 si usas
+
+                $cliente->documentos()->create([
+                    'tipo_doc' => $tipo,
+                    'url_s3' => $path,
+                    'nombre_arch' => $file->getClientOriginalName(),
+                ]);
+            }
+        }
+        */
+
+        // Código para pruebas con documentos Faker
+        $faker = Faker::create();
+
+        $documentosFake = [
+            ['tipo_doc' => 'ine', 'url_s3' => 'faker/path/ine_' . $faker->uuid . '.pdf', 'nombre_arch' => 'ine_fake.pdf'],
+            ['tipo_doc' => 'curp', 'url_s3' => 'faker/path/curp_' . $faker->uuid . '.pdf', 'nombre_arch' => 'curp_fake.pdf'],
+            ['tipo_doc' => 'comprobante', 'url_s3' => 'faker/path/comprobante_' . $faker->uuid . '.pdf', 'nombre_arch' => 'comprobante_fake.pdf'],
+        ];
+
+        foreach ($documentosFake as $doc) {
+            $cliente->documentos()->create($doc);
+        }
+
+        return redirect()->back()->with('success', 'Cliente y documentos (Faker) guardados correctamente');
     }
 
     // Mostrar un cliente específico

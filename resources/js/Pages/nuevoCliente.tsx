@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Head } from '@inertiajs/react';
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
+import { Head, useForm  } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, CloudArrowUpIcon, ExclamationTriangleIcon, UserIcon, ClipboardIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
@@ -70,20 +70,35 @@ export default function NuevoCliente() {
   const [selectedClient, setSelectedClient] = useState<typeof clientesExistentes[0] | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  
 
-  // Cliente
-  const [cliente, setCliente] = useState({ 
-    nombre: '', 
-    edad: '', 
-    sexo: '', 
-    estado_civil: '', 
-    curp: '' 
+  
+  // Archivos del cliente (se mantiene separado)
+  const [clienteFiles, setClienteFiles] = useState<{
+  INE_doc: File | null;
+  CURP_doc: File | null;
+  comprobante_doc: File | null;
+  }>({
+    INE_doc: null,
+    CURP_doc: null,
+    comprobante_doc: null,
   });
-  const [clienteFiles, setClienteFiles] = useState<{ ine: File | null; curp: File | null; comprobante: File | null }>({
-    ine: null,
-    curp: null,
-    comprobante: null,
-  });
+
+  const docKeys = ['INE_doc', 'CURP_doc', 'comprobante_doc'] as const;
+
+
+  // Datos del cliente (unificados en useForm)
+  const { data, setData, post, processing, errors } = useForm({
+    nombre: '',
+    apellido_p: '',
+    apellido_m: '',
+    curp: '',
+    fecha_nac: '',
+    sexo: '',
+    estado_civil: '',
+    edad: '',
+    activo: true,
+    });
 
 
   // Filtrar clientes basado en la búsqueda
@@ -99,31 +114,31 @@ export default function NuevoCliente() {
     target: 'cliente'
   ) {
     const { name, value } = e.target;
-    if (target === 'cliente') setCliente(c => ({ ...c, [name]: value }));
+    if (target === 'cliente') setData(c => ({ ...c, [name]: value }));
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const { name, files } = e.target;
-  if (!files?.[0]) return;
+    const { name, files } = e.target;
+    if (!files?.[0]) return;
 
-  setClienteFiles(prev => ({
-    ...prev,
-    [name]: files[0]
-  }));
-}
+    setClienteFiles(prev => ({
+      ...prev,
+      [name]: files[0]
+    }));
+  }
 
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setSearchQuery(value);
-    setCliente(c => ({ ...c, nombre: value }));
+    setData(c => ({ ...c, nombre: value }));
     setShowSuggestions(value.length > 0);
     setSelectedClient(null);
   }
 
   function selectClient(client: typeof clientesExistentes[0]) {
     setSelectedClient(client);
-    setCliente(c => ({ ...c, nombre: client.nombre }));
+    setData(c => ({ ...c, nombre: client.nombre }));
     setSearchQuery(client.nombre);
     setShowSuggestions(false);
   }
@@ -131,7 +146,7 @@ export default function NuevoCliente() {
   function clearSelection() {
     setSelectedClient(null);
     setSearchQuery('');
-    setCliente(c => ({ ...c, nombre: '' }));
+    setData(c => ({ ...c, nombre: '' }));
     setShowSuggestions(false);
   }
 
@@ -142,10 +157,10 @@ export default function NuevoCliente() {
 
   // Función para copiar CURP al portapapeles
   async function copyCURPToClipboard() {
-    if (!cliente.curp) return;
+    if (!data.curp) return;
     
     try {
-      await navigator.clipboard.writeText(cliente.curp);
+      await navigator.clipboard.writeText(data.curp);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
@@ -207,6 +222,49 @@ export default function NuevoCliente() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+
+  function buildFormData(data: typeof data, clienteFiles: typeof clienteFiles): FormData {
+    const formData = new FormData();
+
+    // Campos normales
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value as string);
+      }
+    });
+
+    // Archivos
+    Object.entries(clienteFiles).forEach(([tipo, file]) => {
+    if (file) {
+      formData.append(`documentos[${tipo}]`, file);
+      }
+    });
+    return formData;
+  }
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    // Construye FormData con campos + archivos
+    const formData = buildFormData(data, clienteFiles);
+
+    post(route('client.store'), {
+      data: formData,
+      forceFormData: true,   // Indica que se manda multipart/form-data
+      onSuccess: () => {
+        console.log('Cliente y documentos guardados con éxito');
+        // Limpia inputs o archivos si quieres:
+        // setData({ nombre: '', apellido_p: '', ... });
+        // setClienteFiles({ ine: null, curp: null, comprobante: null });
+      },
+      onError: () => {
+        console.log('Error de validación');
+      }
+    });
+  }
+
+
 
   return (
     <AuthenticatedLayout>
@@ -272,7 +330,9 @@ export default function NuevoCliente() {
             </div>
           </motion.div>
 
-          <form>
+          <motion.form
+          onSubmit={handleSubmit}
+          >
             <AnimatePresence mode='wait' initial={false}>
                 <motion.div
                   key="cliente"
@@ -310,15 +370,64 @@ export default function NuevoCliente() {
                             Nombre completo<span className="text-red-500 ml-1">*</span>
                           </label>
                           <div className="relative">
-                            <input
+                            {/* <input
                               id="nombre"
                               name="nombre"
                               value={searchQuery}
                               onChange={handleSearchChange}
-                              onFocus={() => setShowSuggestions(searchQuery.length > 0)}
+                              // onFocus={() => setShowSuggestions(searchQuery.length > 0)}
                               placeholder="Ej. Juan Pérez López (escriba para buscar clientes existentes)"
                               className={`${inputBase} ${selectedClient ? 'pr-12' : ''}`}
-                            />
+                            /> */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            {/* Nombre */}
+                            <div>
+                              <label htmlFor="nombre" className="block text-sm font-semibold text-slate-700 mb-2">
+                                Nombre<span className="text-red-500 ml-1">*</span>
+                              </label>
+                              <input
+                                id="nombre"
+                                name="nombre"
+                                value={data.nombre}
+                                onChange={e => handleChange(e, 'cliente')}
+                                placeholder="Juan"
+                                className={inputBase}
+                              />
+                              {errors.nombre && <div className="text-red-500 text-sm">{errors.nombre}</div>}
+                            </div>
+
+                            {/* Apellido Paterno */}
+                            <div>
+                              <label htmlFor="apellido_p" className="block text-sm font-semibold text-slate-700 mb-2">
+                                Apellido Paterno<span className="text-red-500 ml-1">*</span>
+                              </label>
+                              <input
+                                id="apellido_p"
+                                name="apellido_p"
+                                value={data.apellido_p}
+                                onChange={e => handleChange(e, 'cliente')}
+                                placeholder="Pérez"
+                                className={inputBase}
+                              />
+                              {errors.apellido_p && <div className="text-red-500 text-sm">{errors.apellido_p}</div>}
+                            </div>
+
+                            {/* Apellido Materno */}
+                            <div>
+                              <label htmlFor="apellido_m" className="block text-sm font-semibold text-slate-700 mb-2">
+                                Apellido Materno<span className="text-red-500 ml-1">*</span>
+                              </label>
+                              <input
+                                id="apellido_m"
+                                name="apellido_m"
+                                value={data.apellido_m}
+                                onChange={e => handleChange(e, 'cliente')}
+                                placeholder="López"
+                                className={inputBase}
+                              />
+                              {errors.apellido_m && <div className="text-red-500 text-sm">{errors.apellido_m}</div>}
+                            </div>
+                          </div>                            
                             {selectedClient && (
                               <motion.button
                                 type="button"
@@ -449,21 +558,35 @@ export default function NuevoCliente() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-
                         <div>
-                          <label htmlFor="edad" className="block text-sm font-semibold text-slate-700 mb-2">
-                            Edad<span className="text-red-500 ml-1">*</span>
+                          <label htmlFor="fecha_nac" className="block text-sm font-semibold text-slate-700 mb-2">
+                            Fecha de nacimiento <span className="text-red-500 ml-1">*</span>
                           </label>
                           <input
-                            id="edad"
-                            name="edad"
-                            type="number"
-                            min="18"
-                            max="100"
-                            value={cliente.edad}
-                            onChange={e => handleChange(e, 'cliente')}
-                            placeholder="18"
+                            id="fecha_nac"
+                            name="fecha_nac"
+                            type="date"
+                            value={data.fecha_nac}
+                            onChange={e => {
+                              const fecha = e.target.value;
+                              setData('fecha_nac', fecha);
+
+                              if (fecha) {
+                                const today = new Date();
+                                const birthDate = new Date(fecha);
+                                let age = today.getFullYear() - birthDate.getFullYear();
+                                const m = today.getMonth() - birthDate.getMonth();
+                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                  age--;
+                                }
+                                setData('edad', age > 0 ? age : '');
+                              } else {
+                                setData('edad', '');
+                              }
+                            }}
+                            placeholder="YYYY-MM-DD"
                             className={inputBase}
+                            required
                           />
                         </div>
                         <div>
@@ -473,7 +596,7 @@ export default function NuevoCliente() {
                           <select
                             id="sexo"
                             name="sexo"
-                            value={cliente.sexo}
+                            value={data.sexo}
                             onChange={e => handleChange(e, 'cliente')}
                             className={inputBase}
                           >
@@ -489,7 +612,7 @@ export default function NuevoCliente() {
                           <select
                             id="estado_civil"
                             name="estado_civil"
-                            value={cliente.estado_civil}
+                            value={data.estado_civil}
                             onChange={e => handleChange(e, 'cliente')}
                             className={inputBase}
                           >
@@ -509,8 +632,8 @@ export default function NuevoCliente() {
                             <input
                               id="curp"
                               name="curp"
-                              value={cliente.curp}
-                              onChange={e => setCliente(c => ({ ...c, curp: formatCURP(e.target.value) }))}
+                              value={data.curp}
+                              onChange={e => setData(c => ({ ...c, curp: formatCURP(e.target.value) }))}
                               placeholder="PELJ850315HDFRRN09"
                               maxLength={18}
                               className={inputBase}
@@ -520,13 +643,13 @@ export default function NuevoCliente() {
                             <motion.button
                               type="button"
                               onClick={copyCURPToClipboard}
-                              disabled={!cliente.curp}
+                              disabled={!data.curp}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               className={`px-4 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
                                 copySuccess 
                                   ? 'bg-green-500 text-white' 
-                                  : cliente.curp 
+                                  : data.curp 
                                     ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl' 
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               }`}
@@ -588,14 +711,16 @@ export default function NuevoCliente() {
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {(['ine', 'curp', 'comprobante'] as const).map((key, index) => {
+                        {docKeys.map((key, index) => {
                           const labelText =
-                            key === 'ine'
+                            key === 'INE_doc'
                               ? 'INE'
-                              : key === 'curp'
+                              : key === 'CURP_doc'
                               ? 'CURP'
                               : 'Comprobante de Domicilio';
-                          
+
+                          // Resto de tu código con key y labelText...
+
                           const gradients = [
                             'from-blue-500 to-cyan-500',
                             'from-purple-500 to-pink-500',
@@ -686,8 +811,8 @@ export default function NuevoCliente() {
                   </motion.button>
                                     
                   <motion.button
-                    type="button"
-                    onClick={() => alert('Cliente listo')}
+                    type="submit"
+                    // onClick={() => alert('Cliente listo')}
                     whileHover={{ scale: 1.05, boxShadow: "0 15px 30px rgba(59, 130, 246, 0.4)" }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
@@ -698,7 +823,7 @@ export default function NuevoCliente() {
                 </div>
               </div>
             </motion.div>
-          </form>
+          </motion.form>
         </div>
       </div>
 
