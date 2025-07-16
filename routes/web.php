@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ClienteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
@@ -37,17 +38,15 @@ Route::get('/reportes', function () {
 Route::get('/nuevoCliente', function () {
     return Inertia::render('nuevoCliente');
 })->name('nuevoCliente');
+Route::post('/nuevoCliente/store', [ClienteController::class, 'store'])->name('client.store');
 
 Route::get('/panelRevision', function () {
     return Inertia::render('PanelRevision');
 })->name('panelRevision');
 
-// Ruta GET para mostrar formulario con Inertia
 Route::get('/registrarEmpleado', function () {
     return Inertia::render('Users/RegisterUserForm');
 })->name('register.form');
-
-// Ruta POST para procesar el formulario
 Route::post('/registrarEmpleado', [UserController::class, 'store'])->name('register.user');
 
 Route::get('/panelAdministrativo', function () {

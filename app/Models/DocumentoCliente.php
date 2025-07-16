@@ -12,6 +12,7 @@ class DocumentoCliente extends Model
     public $timestamps = false;
     protected $fillable = [
         'cliente_id',
+        'credito_id',
         'tipo_doc',
         'url_s3',
         'nombre_arch',

@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('curp', 18)->unique();
             $table->date('fecha_nac');
             $table->string('sexo', 10);
+            $table->string('estado_civil',20);
             $table->timestamp('creado_en')->useCurrent();
             $table->timestamp('actualizado_en')->useCurrent()->useCurrentOnUpdate();
             $table->boolean('activo');
