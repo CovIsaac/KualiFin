@@ -4,98 +4,115 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use Illuminate\Http\Request;
-use Faker\Factory as Faker;
+use Inertia\Inertia;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class ClienteController extends Controller
 {
-    // Mostrar todos los clientes
-    public function index()
+    // Mostrar formulario
+    public function create()
     {
-        return response()->json(Cliente::all());
+        return Inertia::render('nuevoCliente'); 
     }
 
-    // Crear un nuevo cliente
+    // Listar todos (JSON)
+    public function index()
+    {
+        return response()->json(Cliente::with('documentos')->get());
+    }
+
+    // Guardar nuevo cliente + documentos
     public function store(Request $request)
     {
-        // Validación del cliente
-        $validatedCliente = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'apellido_p' => 'required|string|max:100',
-            'apellido_m' => 'required|string|max:100',
-            'curp' => 'required|string|max:18|unique:clientes,curp',
-            'fecha_nac' => 'required|date',
-            'sexo' => 'required|string|max:10',
-            'estado_civil' => 'required|string|max:20',
-            'activo' => 'required|boolean',
+        // 1) Validación
+        $validated = $request->validate([
+            'nombre'           => 'required|string|max:100',
+            'apellido_p'       => 'required|string|max:100',
+            'apellido_m'       => 'nullable|string|max:100',
+            'curp'             => 'required|string|size:18|unique:clientes,curp',
+            'fecha_nac'        => 'required|date',
+            'sexo'             => 'required|string|max:10',
+            'estado_civil'     => 'required|string|max:20',
+            'activo'           => 'required|boolean',
+            'INE_doc'          => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'CURP_doc'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'comprobante_doc'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        // Validación de documentos (archivos)
-        $validatedDocs = $request->validate([
-            'documentos.ine' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'documentos.curp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'documentos.comprobante' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        // 2) Calculamos edad
+        $validated['edad'] = Carbon::parse($validated['fecha_nac'])->age;
+
+        // 3) Creamos el cliente
+        $cliente = Cliente::create([
+            'nombre'        => $validated['nombre'],
+            'apellido_p'    => $validated['apellido_p'],
+            'apellido_m'    => $validated['apellido_m'] ?? null,
+            'curp'          => $validated['curp'],
+            'fecha_nac'     => $validated['fecha_nac'],
+            'sexo'          => $validated['sexo'],
+            'estado_civil'  => $validated['estado_civil'],
+            'edad'          => $validated['edad'],
+            'activo'        => $validated['activo'],
         ]);
 
-        // Crear cliente
-        $cliente = Cliente::create($validatedCliente);
+        // 4) Generamos nombre de carpeta: nombre_apellidoP
+        $folderName = Str::slug($cliente->nombre . '_' . $cliente->apellido_p);
 
-        // Descomenta para usar documentos reales subidos
-        /*
-        foreach (['ine', 'curp', 'comprobante'] as $tipo) {
-            if ($request->hasFile("documentos.$tipo")) {
-                $file = $request->file("documentos.$tipo");
-                $path = $file->store('clientes_docs'); // O almacenamiento S3 si usas
+        // 5) Manejo de archivos y relación documentos
+        foreach ([
+            'INE_doc'         => 'ine',
+            'CURP_doc'        => 'curp',
+            'comprobante_doc' => 'comprobante',
+        ] as $field => $tipo) {
+            if ($request->hasFile($field)) {
+                $file = $request->file($field);
+                // Guardamos en storage/app/public/clientes/{folderName}/{tipo}/
+                $path = $file->store("clientes/{$folderName}/{$tipo}", 'public');
 
                 $cliente->documentos()->create([
-                    'tipo_doc' => $tipo,
-                    'url_s3' => $path,
+                    'tipo_doc'    => $tipo,
+                    'url_s3'      => $path,
                     'nombre_arch' => $file->getClientOriginalName(),
                 ]);
             }
         }
-        */
 
-        // Código para pruebas con documentos Faker
-        $faker = Faker::create();
-
-        $documentosFake = [
-            ['tipo_doc' => 'ine', 'url_s3' => 'faker/path/ine_' . $faker->uuid . '.pdf', 'nombre_arch' => 'ine_fake.pdf'],
-            ['tipo_doc' => 'curp', 'url_s3' => 'faker/path/curp_' . $faker->uuid . '.pdf', 'nombre_arch' => 'curp_fake.pdf'],
-            ['tipo_doc' => 'comprobante', 'url_s3' => 'faker/path/comprobante_' . $faker->uuid . '.pdf', 'nombre_arch' => 'comprobante_fake.pdf'],
-        ];
-
-        foreach ($documentosFake as $doc) {
-            $cliente->documentos()->create($doc);
-        }
-
-        return redirect()->back()->with('success', 'Cliente y documentos (Faker) guardados correctamente');
+        // 6) Redirigir con flash
+        return redirect()
+            ->route('nuevoCliente')
+            ->with('success', "Cliente y documentos guardados en carpeta {$folderName}");
     }
 
-    // Mostrar un cliente específico
+    // Mostrar uno
     public function show($id)
     {
-        $cliente = Cliente::findOrFail($id);
-        return response()->json($cliente);
+        return response()->json(Cliente::with('documentos')->findOrFail($id));
     }
 
-    // Actualizar un cliente
+    // Actualizar
     public function update(Request $request, $id)
     {
         $cliente = Cliente::findOrFail($id);
+
         $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:100',
-            'apellido_p' => 'sometimes|required|string|max:100',
-            'apellido_m' => 'sometimes|required|string|max:100',
-            'curp' => 'sometimes|required|string|max:18|unique:clientes,curp,' . $id,
-            'fecha_nac' => 'sometimes|required|date',
-            'sexo' => 'sometimes|required|string|max:10',
-            'activo' => 'sometimes|required|boolean',
+            'nombre'      => 'sometimes|required|string|max:100',
+            'apellido_p'  => 'sometimes|required|string|max:100',
+            'apellido_m'  => 'sometimes|nullable|string|max:100',
+            'curp'        => 'sometimes|required|string|size:18|unique:clientes,curp,' . $id,
+            'fecha_nac'   => 'sometimes|required|date',
+            'sexo'        => 'sometimes|required|string|max:10',
+            'estado_civil'=> 'sometimes|required|string|max:20',
+            'edad'        => 'sometimes|required|integer',
+            'activo'      => 'sometimes|required|boolean',
         ]);
+
         $cliente->update($validated);
+
         return response()->json($cliente);
     }
 
-    // Eliminar un cliente
+    // Eliminar
     public function destroy($id)
     {
         $cliente = Cliente::findOrFail($id);

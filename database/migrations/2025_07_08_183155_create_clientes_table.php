@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->timestamp('creado_en')->useCurrent();
             $table->timestamp('actualizado_en')->useCurrent()->useCurrentOnUpdate();
             $table->boolean('activo');
+            $table->integer('edad');
         });
     }
 

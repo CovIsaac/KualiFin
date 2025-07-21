@@ -1,93 +1,22 @@
-
 import React, { useState, FormEvent } from 'react';
+import { useForm } from '@inertiajs/react';
 import ClientPersonalInfo from '@/Components/ClientPersonalInfo';
 import ClientDocuments from '@/Components/ClientDocuments';
 import ExistingClientAlert from '@/Components/ExistingClientAlert';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-// Datos simulados de clientes existentes (optimizado - solo los necesarios para búsqueda)
+// Datos simulados de clientes existentes
 const clientesExistentes = [
-  { 
-    id: 1, 
-    nombre: 'Juan Pérez López', 
-    estado: 'activo', 
-    montoCredito: 15000, 
-    fechaUltimoCredito: '2024-01-15',
-    telefono: '555-123-4567',
-    curp: 'PELJ850315HDFRRN09'
-  },
-  { 
-    id: 2, 
-    nombre: 'Juan Carlos Mendoza', 
-    estado: 'moroso', 
-    montoCredito: 8500, 
-    fechaUltimoCredito: '2023-11-20',
-    telefono: '555-987-6543',
-    curp: 'MECJ900822HDFRRL05'
-  },
-  { 
-    id: 3, 
-    nombre: 'Juana María Rodríguez', 
-    estado: 'pagado', 
-    montoCredito: 12000, 
-    fechaUltimoCredito: '2023-08-10',
-    telefono: '555-456-7890',
-    curp: 'ROBJ880710MDFDRN02'
-  },
-  { 
-    id: 4, 
-    nombre: 'Ana García Martínez', 
-    estado: 'activo', 
-    montoCredito: 20000, 
-    fechaUltimoCredito: '2024-02-01',
-    telefono: '555-234-5678',
-    curp: 'GAMA920405MDFRRN08'
-  },
-  { 
-    id: 5, 
-    nombre: 'Ana Sofía Hernández', 
-    estado: 'moroso', 
-    montoCredito: 7500, 
-    fechaUltimoCredito: '2023-09-15',
-    telefono: '555-345-6789',
-    curp: 'HEAS950618MDFRRN01'
-  },
-  { 
-    id: 6, 
-    nombre: 'Roberto Silva Torres', 
-    estado: 'pagado', 
-    montoCredito: 18000, 
-    fechaUltimoCredito: '2023-12-05',
-    telefono: '555-567-8901',
-    curp: 'SITR870925HDFRRB04'
-  }
+  { id: 1, nombre: 'Juan Pérez López', estado: 'activo', montoCredito: 15000, fechaUltimoCredito: '2024-01-15', telefono: '555-123-4567', curp: 'PELJ850315HDFRRN09' },
+  { id: 2, nombre: 'Juan Carlos Mendoza', estado: 'moroso', montoCredito: 8500, fechaUltimoCredito: '2023-11-20', telefono: '555-987-6543', curp: 'MECJ900822HDFRRL05' },
+  { id: 3, nombre: 'Juana María Rodríguez', estado: 'pagado', montoCredito: 12000, fechaUltimoCredito: '2023-08-10', telefono: '555-456-7890', curp: 'ROBJ880710MDFDRN02' },
+  { id: 4, nombre: 'Ana García Martínez', estado: 'activo', montoCredito: 20000, fechaUltimoCredito: '2024-02-01', telefono: '555-234-5678', curp: 'GAMA920405MDFRRN08' },
+  { id: 5, nombre: 'Ana Sofía Hernández', estado: 'moroso', montoCredito: 7500, fechaUltimoCredito: '2023-09-15', telefono: '555-345-6789', curp: 'HEAS950618MDFRRN01' },
+  { id: 6, nombre: 'Roberto Silva Torres', estado: 'pagado', montoCredito: 18000, fechaUltimoCredito: '2023-12-05', telefono: '555-567-8901', curp: 'SITR870925HDFRRB04' }
 ];
 
-interface FormData {
-  nombre: string;
-  apellido_p: string;
-  apellido_m: string;
-  curp: string;
-  fecha_nac: string;
-  sexo: string;
-  estado_civil: string;
-  edad: string;
-  activo: boolean;
-}
-
-interface ClientFiles {
-  INE_doc: File | null;
-  CURP_doc: File | null;
-  comprobante_doc: File | null;
-}
-
 export default function nuevoCliente() {
-  const [selectedClient, setSelectedClient] = useState<typeof clientesExistentes[0] | null>(null);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [processing, setProcessing] = useState(false);
-
-  // Datos del formulario
-  const [data, setData] = useState<FormData>({
+  const form = useForm({
     nombre: '',
     apellido_p: '',
     apellido_m: '',
@@ -95,71 +24,64 @@ export default function nuevoCliente() {
     fecha_nac: '',
     sexo: '',
     estado_civil: '',
-    edad: '',
     activo: true,
-  });
-
-  const [errors, setErrors] = useState<Partial<FormData>>({});
-
-  // Archivos del cliente
-  const [clienteFiles, setClienteFiles] = useState<ClientFiles>({
     INE_doc: null,
     CURP_doc: null,
     comprobante_doc: null,
   });
 
+  const [selectedClient, setSelectedClient] = useState<typeof clientesExistentes[0] | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const { name, value } = e.target;
-    setData(prev => ({ ...prev, [name]: value }));
+    form.setData(e.target.name as any, e.target.value);
   }
 
   function handleDateChange(fecha: string) {
-    setData(prev => ({ ...prev, fecha_nac: fecha }));
+    form.setData('fecha_nac', fecha);
   }
 
   function handleCURPChange(curp: string) {
-    setData(prev => ({ ...prev, curp }));
+    form.setData('curp', curp);
+    const match = clientesExistentes.find(c => c.curp === curp) ?? null;
+    setSelectedClient(match);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, files } = e.target;
-    if (!files?.[0]) return;
-
-    setClienteFiles(prev => ({
-      ...prev,
-      [name]: files[0]
-    }));
-  }
-
-  // Función para copiar CURP al portapapeles (optimizada)
-  async function copyCURPToClipboard() {
-    if (!data.curp) return;
-    
-    try {
-      await navigator.clipboard.writeText(data.curp);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error('Error al copiar al portapapeles:', err);
+    if (e.target.files?.[0]) {
+      form.setData(e.target.name as any, e.target.files[0]);
     }
   }
 
-  // Función para abrir página de CURP
+  async function copyCURPToClipboard() {
+    if (!form.data.curp) return;
+    try {
+      await navigator.clipboard.writeText(form.data.curp);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
+      /* noop */
+    }
+  }
+
   function openCURPPage() {
     window.open('https://www.gob.mx/curp/', '_blank');
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setProcessing(true);
-
-    // Simulación de envío
-    setTimeout(() => {
-      console.log('Cliente guardado:', data);
-      console.log('Archivos:', clienteFiles);
-      setProcessing(false);
-      alert('Cliente guardado exitosamente');
-    }, 1000);
+    form.post(route('client.store'), {
+      forceFormData: true,
+      onSuccess: () => {
+        alert('✅ Cliente guardado correctamente');
+        form.reset();
+        setSelectedClient(null);
+      },
+      onError: errors => {
+        const messages = Object.values(errors).join('\n');
+        alert(`❌ Error al guardar:\n${messages}`);
+      },
+    });
   }
 
   return (
@@ -170,45 +92,41 @@ export default function nuevoCliente() {
           <div className="mb-8 text-center">
             <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xl">
-                  👤
-                </div>
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xl">👤</div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Datos del Cliente</h1>
                   <p className="text-gray-600">Información personal y documentos</p>
                 </div>
               </div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full w-full"></div>
+                <div className="h-full bg-blue-600 rounded-full w-full" />
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Información Personal del Cliente */}
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
             <ClientPersonalInfo
-              data={data}
+              data={form.data}
               onChange={handleChange}
               onDateChange={handleDateChange}
               onCURPChange={handleCURPChange}
-              errors={errors}
+              errors={form.errors}
               copySuccess={copySuccess}
               onCopyCURP={copyCURPToClipboard}
               onOpenCURPPage={openCURPPage}
             />
 
-            {/* Documentos del Cliente */}
             <ClientDocuments
-              clienteFiles={clienteFiles}
+              clienteFiles={{
+                INE_doc: form.data.INE_doc,
+                CURP_doc: form.data.CURP_doc,
+                comprobante_doc: form.data.comprobante_doc,
+              }}
               onFileChange={handleFileChange}
             />
 
-            {/* Cliente existente alerta */}
-            {selectedClient && (
-              <ExistingClientAlert selectedClient={selectedClient} />
-            )}
+            {selectedClient && <ExistingClientAlert selectedClient={selectedClient} />}
 
-            {/* Navegación */}
             <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <button
@@ -218,17 +136,16 @@ export default function nuevoCliente() {
                 >
                   ← Cancelar
                 </button>
-                
                 <button
                   type="submit"
-                  disabled={processing}
+                  disabled={form.processing}
                   className={`w-full sm:w-auto px-6 py-3 rounded-lg font-medium transition-colors duration-200 ${
-                    processing
+                    form.processing
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : 'bg-green-600 hover:bg-green-700 text-white'
                   }`}
                 >
-                  {processing ? 'Guardando...' : '✅ Guardar Cliente'}
+                  {form.processing ? 'Guardando...' : '✅ Guardar Cliente'}
                 </button>
               </div>
             </div>
