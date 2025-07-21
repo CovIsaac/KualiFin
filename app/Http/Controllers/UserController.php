@@ -4,36 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rules;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class UserController extends Controller
 {
-    public function store(Request $request){
+    public function store(Request $request)
+    {
+        // 1) Validación
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'rol' => 'required|string',
-            'telefono' => 'required|string|max:10',
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|string|email|max:255|unique:users,email',
+            'rol'                   => 'required|string|in:promotor,supervisor,administrador,ejecutivo',
+            'telefono'              => 'nullable|string|max:20',
+            'password'              => ['required','confirmed', Rules\Password::defaults()],
         ]);
 
+        // 2) Creación de usuario
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'rol' => $validated['rol'],
-            'telefono' => $validated['telefono'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'rol'      => $validated['rol'],
+            'telefono' => $validated['telefono'] ?? null,
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Puedes lanzar el evento si lo necesitas
+        // 3) Disparar evento Registered (opcional)
         event(new Registered($user));
 
-        // Redirige (aunque sea a la misma página), para que Inertia dispare onSuccess()
-        return redirect()->back()->with('success', 'Empleado registrado');
+        // 4) Redirigir con flash
+        return redirect()
+               ->route('register.form')
+               ->with('success', 'Empleado registrado correctamente.');
     }
 }

@@ -1,66 +1,61 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\ClienteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DocumentoClienteController; // ← importa tu controlador
+use Illuminate\Foundation\Application;
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', fn() => redirect('/login'));
 
-Route::apiResource('documentos', DocumentoClienteController::class);
+Route::middleware(['auth','verified'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
+         ->name('dashboard');
 
-
-Route::middleware(['auth', 'verified'])->group(function () {
     // Perfil de usuario
-    Route::get('/profile', [ProfileController::class, 'edit'])
+    Route::get('/profile',   [ProfileController::class, 'edit'])
          ->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])
          ->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
+    Route::delete('/profile',[ProfileController::class, 'destroy'])
          ->name('profile.destroy');
 
-    // Nuevo cliente (Inertia + React)
-    Route::get('/nuevoCliente', [ClienteController::class, 'create'])
+    // Clientes
+    Route::get('/nuevoCliente',           [ClienteController::class, 'create'])
          ->name('nuevoCliente');
-    Route::post('/nuevoCliente/store', [ClienteController::class, 'store'])
+    Route::post('/nuevoCliente/store',    [ClienteController::class, 'store'])
          ->name('client.store');
 
-    // Otras páginas Inertia protegidas
-    Route::get('/nuevoCredito', function () {
-        return Inertia::render('solicitud');
-    })->name('solicitud');
+    // Documentos de cliente (API RESTful)
+    Route::apiResource('documentos', DocumentoClienteController::class);
 
-    Route::get('/recreditoCliente', function () {
-        return Inertia::render('recreditoClientes');
-    })->name('recreditoClientes');
-
-    Route::get('/reportes', function () {
-        return Inertia::render('reportes');
-    })->name('reportes');
-
-    Route::get('/panelRevision', function () {
-        return Inertia::render('PanelRevision');
-    })->name('panelRevision');
+    // Otras páginas Inertia
+    Route::get('/nuevoCredito',    fn() => Inertia::render('solicitud'))
+         ->name('solicitud');
+    Route::get('/recreditoCliente',fn() => Inertia::render('recreditoClientes'))
+         ->name('recreditoClientes');
+    Route::get('/reportes',        fn() => Inertia::render('reportes'))
+         ->name('reportes');
+    Route::get('/panelRevision',   fn() => Inertia::render('PanelRevision'))
+         ->name('panelRevision');
+    Route::get('/panelAdministrativo', fn() => Inertia::render('AdminDashboard'))
+         ->name('AdminDashboard');
 
     // Registro de empleados
-    Route::get('/registrarEmpleado', function () {
-        return Inertia::render('Users/RegisterUserForm');
-    })->name('register.form');
-    Route::post('/registrarEmpleado', [UserController::class, 'store'])
+    Route::get('/registrarEmpleado',    fn() => Inertia::render('Users/RegisterUserForm'))
+         ->name('register.form');
+    Route::post('/registrarEmpleado',   [UserController::class, 'store'])
          ->name('register.user');
-
-    Route::get('/panelAdministrativo', function () {
-        return Inertia::render('AdminDashboard');
-    })->name('AdminDashboard');
 });
 
+// Auth routes (login, register, etc.)
 require __DIR__.'/auth.php';
