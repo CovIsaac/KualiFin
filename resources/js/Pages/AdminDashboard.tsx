@@ -3,34 +3,6 @@ import { Head, Link } from '@inertiajs/react';
 import React from 'react';
 
 export default function AdminDashboard() {
-  // Estadísticas del panel administrativo
-  const adminStats = [
-    { 
-      title: 'Empleados Activos', 
-      value: 12, 
-      icon: '👥', 
-      description: 'Personal trabajando'
-    },
-    { 
-      title: 'Nuevos Registros', 
-      value: 3, 
-      icon: '📝', 
-      description: 'Este mes'
-    },
-    { 
-      title: 'Roles Activos', 
-      value: 4, 
-      icon: '🎯', 
-      description: 'Tipos de puesto'
-    },
-    { 
-      title: 'Accesos Hoy', 
-      value: 28, 
-      icon: '🔐', 
-      description: 'Sesiones iniciadas'
-    },
-  ];
-
   // Opciones del panel administrativo
   const adminOptions = [
     {
@@ -100,36 +72,8 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          {/* Estadísticas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {adminStats.map(({ title, value, icon, description }) => (
-              <div key={title} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between space-y-0 pb-2">
-                  <div className="text-2xl">{icon}</div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    {title}
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {value}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Herramientas Administrativas */}
           <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <span className="text-2xl">🛠️</span>
-                Herramientas Administrativas
-              </h2>
-            </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {adminOptions.map((option) => (
@@ -179,45 +123,6 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Información adicional */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <span className="text-2xl">ℹ️</span>
-                Información del Sistema
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🔧</span>
-                    <span className="font-medium text-sm">Estado del Sistema</span>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-green-600">
-                      Operativo
-                    </div>
-                    <div className="text-sm text-gray-600">Todos los servicios funcionando correctamente</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📅</span>
-                    <span className="font-medium text-sm">Última Actualización</span>
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-gray-900">
-                      {new Date().toLocaleDateString('es-MX')}
-                    </div>
-                    <div className="text-sm text-gray-600">Sistema actualizado</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
