@@ -56,12 +56,6 @@ export default function AuthenticatedLayout({
               alt="Logo" 
               className="h-10 w-auto object-contain" 
             />
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-blue-600">
-                KualiFin
-              </h1>
-              <p className="text-xs text-slate-500 font-medium">Sistema de Créditos</p>
-            </div>
           </div>
 
           {/* User info en header */}
@@ -117,15 +111,6 @@ export default function AuthenticatedLayout({
           {sidebarOpen && (
             <div className="px-3 pb-6 border-t border-slate-200 mt-4">
               <div className="mt-4 p-4 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {auth.user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-700 truncate">{auth.user.name}</p>
-                    <p className="text-xs text-slate-500">Usuario activo</p>
-                  </div>
-                </div>
                 
                 <Link
                   href={route('logout')}
