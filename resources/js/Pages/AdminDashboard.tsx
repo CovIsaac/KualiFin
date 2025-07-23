@@ -3,34 +3,6 @@ import { Head, Link } from '@inertiajs/react';
 import React from 'react';
 
 export default function AdminDashboard() {
-  // Estadísticas del panel administrativo
-  const adminStats = [
-    { 
-      title: 'Empleados Activos', 
-      value: 12, 
-      icon: '👥', 
-      description: 'Personal trabajando'
-    },
-    { 
-      title: 'Nuevos Registros', 
-      value: 3, 
-      icon: '📝', 
-      description: 'Este mes'
-    },
-    { 
-      title: 'Roles Activos', 
-      value: 4, 
-      icon: '🎯', 
-      description: 'Tipos de puesto'
-    },
-    { 
-      title: 'Accesos Hoy', 
-      value: 28, 
-      icon: '🔐', 
-      description: 'Sesiones iniciadas'
-    },
-  ];
-
   // Opciones del panel administrativo
   const adminOptions = [
     {
